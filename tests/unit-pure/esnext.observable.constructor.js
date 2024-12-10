@@ -1,4 +1,4 @@
-import { STRICT } from '../helpers/constants';
+import { STRICT } from '../helpers/constants.js';
 
 import Symbol from 'core-js-pure/full/symbol';
 import Observable from 'core-js-pure/full/observable';
@@ -6,7 +6,6 @@ import Observable from 'core-js-pure/full/observable';
 QUnit.test('Observable', assert => {
   assert.isFunction(Observable);
   assert.arity(Observable, 1);
-  assert.throws(() => Observable(() => { /* empty */ }), 'throws w/o `new`');
   const observable = new Observable(function (subscriptionObserver) {
     assert.same(typeof subscriptionObserver, 'object', 'Subscription observer is object');
     assert.same(subscriptionObserver.constructor, Object);
@@ -23,6 +22,8 @@ QUnit.test('Observable', assert => {
   });
   observable.subscribe({});
   assert.true(observable instanceof Observable);
+  // eslint-disable-next-line sonarjs/inconsistent-function-call -- required for testing
+  assert.throws(() => Observable(() => { /* empty */ }), 'throws w/o `new`');
 });
 
 QUnit.test('Observable#subscribe', assert => {

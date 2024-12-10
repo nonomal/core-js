@@ -1,5 +1,5 @@
-/* eslint-disable regexp/sort-flags, regexp/no-useless-flag -- required for testing */
-import { STRICT } from '../helpers/constants';
+/* eslint-disable prefer-regex-literals, regexp/sort-flags, regexp/no-useless-flag -- required for testing */
+import { STRICT } from '../helpers/constants.js';
 
 QUnit.test('RegExp#toString', assert => {
   const { toString } = RegExp.prototype;
@@ -32,7 +32,7 @@ QUnit.test('RegExp#toString', assert => {
   }
 
   assert.throws(() => toString.call({
-    source: Symbol(),
+    source: Symbol('RegExp#toString test'),
     flags: 'g',
   }), 'throws on symbol');
 });

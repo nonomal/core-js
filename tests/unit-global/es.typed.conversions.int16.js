@@ -1,4 +1,4 @@
-import { DESCRIPTORS, GLOBAL, LITTLE_ENDIAN, NATIVE } from '../helpers/constants';
+import { DESCRIPTORS, GLOBAL, LITTLE_ENDIAN, NATIVE } from '../helpers/constants.js';
 
 if (DESCRIPTORS) QUnit.test('Int16 conversions', assert => {
   const int16array = new Int16Array(1);
@@ -12,7 +12,7 @@ if (DESCRIPTORS) QUnit.test('Int16 conversions', assert => {
     return it === 0 && 1 / it === -Infinity ? '-0' : it;
   }
 
-  let data = [
+  const data = [
     [0, 0, [0, 0]],
     [-0, 0, [0, 0]],
     [1, 1, [1, 0]],
@@ -56,7 +56,7 @@ if (DESCRIPTORS) QUnit.test('Int16 conversions', assert => {
   ];
   // Android 4.3- bug
   if (NATIVE || !/Android [2-4]/.test(GLOBAL.navigator && navigator.userAgent)) {
-    data = data.concat([
+    data.push(
       [2147483649, 1, [1, 0]],
       [-2147483649, -1, [255, 255]],
       [4294967295, -1, [255, 255]],
@@ -65,7 +65,7 @@ if (DESCRIPTORS) QUnit.test('Int16 conversions', assert => {
       [-9007199254740991, 1, [1, 0]],
       [9007199254740994, 2, [2, 0]],
       [-9007199254740994, -2, [254, 255]],
-    ]);
+    );
   }
   for (const [value, conversion, little] of data) {
     const big = little.slice().reverse();

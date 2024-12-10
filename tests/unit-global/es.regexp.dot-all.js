@@ -1,4 +1,5 @@
-import { DESCRIPTORS } from '../helpers/constants';
+/* eslint-disable prefer-regex-literals -- required for testing */
+import { DESCRIPTORS } from '../helpers/constants.js';
 
 if (DESCRIPTORS) {
   QUnit.test('RegExp#dotAll', assert => {
@@ -16,13 +17,13 @@ if (DESCRIPTORS) {
       try {
         dotAllGetter.call(/a/);
         assert.required('.dotAll getter works on literals');
-      } catch (error) {
+      } catch {
         assert.avoid('.dotAll getter works on literals');
       }
       try {
         dotAllGetter.call(new RegExp('a'));
         assert.required('.dotAll getter works on instances');
-      } catch (error) {
+      } catch {
         assert.avoid('.dotAll getter works on instances');
       }
 

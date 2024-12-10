@@ -1,5 +1,6 @@
-import { DESCRIPTORS } from '../helpers/constants';
-import { createIterable } from '../helpers/helpers';
+/* eslint-disable prefer-rest-params -- required for testing */
+import { DESCRIPTORS } from '../helpers/constants.js';
+import { createIterable } from '../helpers/helpers.js';
 
 import Symbol from 'core-js-pure/es/symbol';
 import defineProperty from 'core-js-pure/es/object/define-property';
@@ -89,6 +90,7 @@ QUnit.test('Array.from', assert => {
   assert.arrayEqual(instance, [1, 2], 'generic, array-like case, elements');
   let array = [1, 2, 3];
   done = false;
+  // eslint-disable-next-line es/no-nonstandard-array-prototype-properties -- legacy FF case
   array['@@iterator'] = undefined;
   array[Symbol.iterator] = function () {
     done = true;

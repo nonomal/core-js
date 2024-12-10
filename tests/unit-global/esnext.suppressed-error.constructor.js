@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/throw-new-error -- testing */
 QUnit.test('SuppressedError', assert => {
   assert.isFunction(SuppressedError);
   assert.arity(SuppressedError, 3);
@@ -40,7 +41,7 @@ QUnit.test('SuppressedError', assert => {
   assert.false('cause' in error2);
   assert.same(error2.name, 'SuppressedError');
 
-  assert.throws(() => SuppressedError(1, 2, Symbol()), 'throws on symbol as a message');
+  assert.throws(() => SuppressedError(1, 2, Symbol('SuppressedError constructor test')), 'throws on symbol as a message');
   assert.same(({}).toString.call(SuppressedError()), '[object Error]', 'Object#toString');
 
   assert.same(SuppressedError.prototype.constructor, SuppressedError, 'prototype constructor');
