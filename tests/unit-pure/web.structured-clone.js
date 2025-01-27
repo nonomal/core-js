@@ -1,8 +1,8 @@
 // Originally from: https://github.com/web-platform-tests/wpt/blob/4b35e758e2fc4225368304b02bcec9133965fd1a/IndexedDB/structured-clone.any.js
 // Copyright © web-platform-tests contributors. Available under the 3-Clause BSD License.
 /* eslint-disable es/no-error-cause, es/no-typed-arrays -- safe */
-import { GLOBAL, NODE } from '../helpers/constants';
-import { fromSource } from '../helpers/helpers';
+import { GLOBAL, NODE, BUN } from '../helpers/constants.js';
+import { bufferToArray, fromSource } from '../helpers/helpers.js';
 
 import structuredClone from 'core-js-pure/stable/structured-clone';
 import from from 'core-js-pure/es/array/from';
@@ -79,7 +79,7 @@ QUnit.module('structuredClone', () => {
   ];
 
   QUnit.test('primitives', assert => {
-    const primitives = [undefined, null].concat(booleans, numbers, bigints, strings);
+    const primitives = [undefined, null, ...booleans, ...numbers, ...bigints, ...strings];
 
     for (const value of primitives) cloneTest(value, (orig, clone) => {
       assert.same(orig, clone, 'primitives should be same after cloned');
@@ -88,7 +88,7 @@ QUnit.module('structuredClone', () => {
 
   // "Primitive" Objects (Boolean, Number, BigInt, String)
   QUnit.test('primitive objects', assert => {
-    const primitives = [].concat(booleans, numbers, bigints, strings);
+    const primitives = [...booleans, ...numbers, ...bigints, ...strings];
 
     for (const value of primitives) cloneObjectTest(assert, Object(value), (orig, clone) => {
       assert.same(orig.valueOf(), clone.valueOf(), 'primitive wrappers should have same value');
@@ -184,6 +184,40 @@ QUnit.module('structuredClone', () => {
           assert.same(orig.byteOffset, clone.byteOffset);
           assert.arrayEqual(new Int8Array(view.buffer), array);
         });
+      });
+    }
+
+    if ('resizable' in ArrayBuffer.prototype) {
+      QUnit.test('Resizable ArrayBuffer', assert => {
+        const array = [1, 2, 3, 4, 5, 6, 7, 8];
+
+        // eslint-disable-next-line es/no-resizable-and-growable-arraybuffers -- safe
+        let buffer = new ArrayBuffer(8, { maxByteLength: 16 });
+        new Int8Array(buffer).set(array);
+        let copy = structuredClone(buffer);
+        assert.arrayEqual(bufferToArray(copy), array, 'resizable-ab-1');
+        assert.true(copy.resizable, 'resizable-ab-1');
+
+        buffer = new ArrayBuffer(8);
+        new Int8Array(buffer).set(array);
+        copy = structuredClone(buffer);
+        assert.arrayEqual(bufferToArray(copy), array, 'non-resizable-ab-1');
+        assert.false(copy.resizable, 'non-resizable-ab-1');
+
+        // eslint-disable-next-line es/no-resizable-and-growable-arraybuffers -- safe
+        buffer = new ArrayBuffer(8, { maxByteLength: 16 });
+        let tarray = new Int8Array(buffer);
+        tarray.set(array);
+        copy = structuredClone(tarray).buffer;
+        assert.arrayEqual(bufferToArray(copy), array, 'resizable-ab-2');
+        assert.true(copy.resizable, 'resizable-ab-2');
+
+        buffer = new ArrayBuffer(8);
+        tarray = new Int8Array(buffer);
+        tarray.set(array);
+        copy = structuredClone(tarray).buffer;
+        assert.arrayEqual(bufferToArray(copy), array, 'non-resizable-ab-2');
+        assert.false(copy.resizable, 'non-resizable-ab-2');
       });
     }
   }
@@ -396,7 +430,8 @@ QUnit.module('structuredClone', () => {
     });
   });
 
-  if (fromSource('new File(["test"], "foo.txt")')) QUnit.test('File', assert => {
+  // https://github.com/oven-sh/bun/issues/11696
+  if (!BUN && fromSource('new File(["test"], "foo.txt")')) QUnit.test('File', assert => {
     cloneObjectTest(
       assert,
       new File(['This is a test.'], 'foo.txt', { type: 'c/d' }),
@@ -411,7 +446,7 @@ QUnit.module('structuredClone', () => {
   });
 
   // FileList
-  if (fromSource('new File(["test"], "foo.txt")') && fromSource('new DataTransfer()')) QUnit.test('FileList', assert => {
+  if (fromSource('new File(["test"], "foo.txt")') && fromSource('new DataTransfer() && "items" in DataTransfer.prototype')) QUnit.test('FileList', assert => {
     const transfer = new DataTransfer();
     transfer.items.add(new File(['test'], 'foo.txt'));
     cloneObjectTest(

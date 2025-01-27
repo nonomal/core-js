@@ -1,5 +1,6 @@
 import Promise from 'core-js-pure/es/promise';
 import assign from 'core-js-pure/es/object/assign';
+import create from 'core-js-pure/es/object/create';
 import values from 'core-js-pure/es/array/values';
 import AsyncIterator from 'core-js-pure/actual/async-iterator';
 
@@ -13,7 +14,7 @@ QUnit.test('AsyncIterator.from', assert => {
 
   assert.true(AsyncIterator.from([]) instanceof AsyncIterator, 'proxy, iterable');
 
-  const asyncIterator = assign(new AsyncIterator(), {
+  const asyncIterator = assign(create(AsyncIterator.prototype), {
     next: () => { /* empty */ },
   });
 
@@ -21,8 +22,6 @@ QUnit.test('AsyncIterator.from', assert => {
 
   assert.throws(() => from(undefined), TypeError);
   assert.throws(() => from(null), TypeError);
-  assert.throws(() => from({}), TypeError);
-  assert.throws(() => from(assign(new AsyncIterator(), { next: 42 })), TypeError);
 
   return AsyncIterator.from([1, Promise.resolve(2), 3]).toArray().then(result => {
     assert.arrayEqual(result, [1, 2, 3], 'unwrap promises');

@@ -1,4 +1,4 @@
-import { GLOBAL, STRICT } from '../helpers/constants';
+import { GLOBAL, STRICT } from '../helpers/constants.js';
 
 QUnit.test('Object#toString', assert => {
   const { toString } = Object.prototype;
@@ -20,6 +20,7 @@ QUnit.test('Object#toString', assert => {
   assert.same(toString.call(/./), '[object RegExp]', 'regexp -> `RegExp`');
   assert.same(toString.call(new TypeError()), '[object Error]', 'new TypeError -> `Error`');
   assert.same(toString.call(function () {
+    // eslint-disable-next-line prefer-rest-params -- required for testing
     return arguments;
   }()), '[object Arguments]', 'arguments -> `Arguments`');
   const constructors = [
@@ -70,10 +71,10 @@ QUnit.test('Object#toString', assert => {
   if ([].entries) {
     assert.same(`${ [].entries() }`, '[object Array Iterator]', 'Array Iterator -> `Array Iterator`');
   }
-  if (GLOBAL.Set && Set.entries) {
+  if (GLOBAL.Set && Set.prototype.entries) {
     assert.same(`${ new Set().entries() }`, '[object Set Iterator]', 'Set Iterator -> `Set Iterator`');
   }
-  if (GLOBAL.Map && Map.entries) {
+  if (GLOBAL.Map && Map.prototype.entries) {
     assert.same(`${ new Map().entries() }`, '[object Map Iterator]', 'Map Iterator -> `Map Iterator`');
   }
   assert.same(`${ Math }`, '[object Math]', 'Math -> `Math`');

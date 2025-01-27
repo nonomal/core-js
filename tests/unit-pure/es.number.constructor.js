@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/inconsistent-function-call -- required for testing */
 import globalThis from 'core-js-pure/es/global-this';
 import create from 'core-js-pure/es/object/create';
 import Number from 'core-js-pure/es/number';
@@ -163,8 +164,9 @@ QUnit.test('Number constructor: regression', assert => {
   }), TypeError, 'new Number assert.throws on object then valueOf and toString are not functions');
 
   if (typeof Symbol == 'function' && !Symbol.sham) {
-    assert.throws(() => Number(Symbol()), 'throws on symbol argument');
-    assert.throws(() => new Number(Symbol()), 'throws on symbol argument, new');
+    const symbol = Symbol('Number constructor test');
+    assert.throws(() => Number(symbol), 'throws on symbol argument');
+    assert.throws(() => new Number(symbol), 'throws on symbol argument, new');
   }
 
   number = new Number(42);
