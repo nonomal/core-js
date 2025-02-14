@@ -1,5 +1,5 @@
 import isConstructor from 'core-js-pure/full/function/is-constructor';
-import { fromSource } from '../helpers/helpers';
+import { fromSource } from '../helpers/helpers.js';
 
 QUnit.test('Function.isConstructor', assert => {
   assert.isFunction(isConstructor);
@@ -7,6 +7,7 @@ QUnit.test('Function.isConstructor', assert => {
   assert.name(isConstructor, 'isConstructor');
   assert.false(isConstructor({}), 'object');
   assert.false(isConstructor(function () {
+    // eslint-disable-next-line prefer-rest-params -- required for testing
     return arguments;
   }()), 'arguments');
   assert.false(isConstructor([]), 'array');
@@ -29,7 +30,7 @@ QUnit.test('Function.isConstructor', assert => {
   // V8 ~ Chrome 49- bug
   if (Gen) try {
     new Gen();
-  } catch (error) {
+  } catch {
     assert.false(isConstructor(Gen), 'gen');
   }
   const asyncFunc = fromSource('async function () {}');

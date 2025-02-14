@@ -1,4 +1,4 @@
-import { createIterable } from '../helpers/helpers';
+import { createIterable } from '../helpers/helpers.js';
 import getIteratorMethod from 'core-js-pure/es/get-iterator-method';
 
 import Promise from 'core-js-pure/es/promise';
@@ -15,6 +15,7 @@ QUnit.test('Promise.all', assert => {
   assert.true(iterable.called, 'works with iterables: next called');
   const array = [];
   let done = false;
+  // eslint-disable-next-line es/no-nonstandard-array-prototype-properties -- legacy FF case
   array['@@iterator'] = undefined;
   array[Symbol.iterator] = function () {
     done = true;
@@ -35,7 +36,7 @@ QUnit.test('Promise.all', assert => {
         done = true;
       },
     })).catch(() => { /* empty */ });
-  } catch (error) { /* empty */ }
+  } catch { /* empty */ }
   Promise.resolve = resolve;
   assert.true(done, 'iteration closing');
   let FakePromise1 = function (executor) {

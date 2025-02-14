@@ -1,5 +1,5 @@
-import { DESCRIPTORS } from '../helpers/constants';
-import { createIterable } from '../helpers/helpers';
+import { DESCRIPTORS, BUN } from '../helpers/constants.js';
+import { createIterable } from '../helpers/helpers.js';
 
 import getPrototypeOf from 'core-js-pure/es/object/get-prototype-of';
 import getOwnPropertyDescriptor from 'core-js-pure/es/object/get-own-property-descriptor';
@@ -102,12 +102,42 @@ QUnit.test('URLSearchParams', assert => {
   params = new URLSearchParams(params.toString());
   assert.same(params.get('query'), '+15555555555', 'parse encoded +');
 
+  params = new URLSearchParams('b=%2sf%2a');
+  assert.same(params.get('b'), '%2sf*', 'parse encoded %2sf%2a');
+  params = new URLSearchParams('b=%%2a');
+  assert.same(params.get('b'), '%*', 'parse encoded b=%%2a');
+
+  params = new URLSearchParams('a=b\u2384');
+  assert.same(params.get('a'), 'b\u2384', 'parse \u2384');
+  params = new URLSearchParams('a\u2384b=c');
+  assert.same(params.get('a\u2384b'), 'c', 'parse \u2384');
+
+  params = new URLSearchParams('a=b%e2%8e%84');
+  assert.same(params.get('a'), 'b\u2384', 'parse b%e2%8e%84');
+  params = new URLSearchParams('a%e2%8e%84b=c');
+  assert.same(params.get('a\u2384b'), 'c', 'parse b%e2%8e%84');
+
+  params = new URLSearchParams('a=b\uD83D\uDCA9c');
+  assert.same(params.get('a'), 'b\uD83D\uDCA9c', 'parse \uD83D\uDCA9');
+  params = new URLSearchParams('a\uD83D\uDCA9b=c');
+  assert.same(params.get('a\uD83D\uDCA9b'), 'c', 'parse \uD83D\uDCA9');
+
+  params = new URLSearchParams('a=b%f0%9f%92%a9c');
+  assert.same(params.get('a'), 'b\uD83D\uDCA9c', 'parse %f0%9f%92%a9');
+  params = new URLSearchParams('a%f0%9f%92%a9b=c');
+  assert.same(params.get('a\uD83D\uDCA9b'), 'c', 'parse %f0%9f%92%a9');
+
+  assert.same(String(new URLSearchParams('%C2')), '%EF%BF%BD=');
+  assert.same(String(new URLSearchParams('%F0%9F%D0%90')), '%EF%BF%BD%D0%90=');
+  assert.same(String(new URLSearchParams('%25')), '%25=');
+  assert.same(String(new URLSearchParams('%4')), '%254=');
+
   const testData = [
     { input: '?a=%', output: [['a', '%']], name: 'handling %' },
     { input: { '+': '%C2' }, output: [['+', '%C2']], name: 'object with +' },
     { input: { c: 'x', a: '?' }, output: [['c', 'x'], ['a', '?']], name: 'object with two keys' },
     { input: [['c', 'x'], ['a', '?']], output: [['c', 'x'], ['a', '?']], name: 'array with two keys' },
-    // eslint-disable-next-line max-len -- ignore
+    // eslint-disable-next-line @stylistic/js/max-len -- ignore
     // !!! { input: { 'a\0b': '42', 'c\uD83D': '23', dሴ: 'foo' }, output: [['a\0b', '42'], ['c\uFFFD', '23'], ['d\u1234', 'foo']], name: 'object with NULL, non-ASCII, and surrogate keys' },
   ];
 
@@ -121,7 +151,9 @@ QUnit.test('URLSearchParams', assert => {
     });
   }
 
-  assert.throws(() => {
+  // https://github.com/oven-sh/bun/issues/9253
+  if (!BUN) assert.throws(() => {
+    // eslint-disable-next-line sonarjs/inconsistent-function-call -- required for testing
     URLSearchParams('');
   }, 'throws w/o `new`');
 
@@ -229,6 +261,18 @@ QUnit.test('URLSearchParams#delete', assert => {
   params.append('first', 10);
   params.delete('first');
   assert.false(params.has('first'), 'search params object has no "first" name');
+
+  params = new URLSearchParams('a=1&a=2&a=null&a=3&b=4');
+  params.delete('a', 2);
+  assert.same(String(params), 'a=1&a=null&a=3&b=4');
+
+  params = new URLSearchParams('a=1&a=2&a=null&a=3&b=4');
+  params.delete('a', null);
+  assert.same(String(params), 'a=1&a=2&a=3&b=4');
+
+  params = new URLSearchParams('a=1&a=2&a=null&a=3&b=4');
+  params.delete('a', undefined);
+  assert.same(String(params), 'b=4');
 
   if (DESCRIPTORS) {
     let url = new URL('http://example.com/?param1&param2');
@@ -372,6 +416,15 @@ QUnit.test('URLSearchParams#has', assert => {
   assert.false(params.has('d'), 'search params object has no name "d"');
   params.delete('first');
   assert.false(params.has('first'), 'search params object has no name "first"');
+
+  params = new URLSearchParams('a=1&a=2&a=null&a=3&b=4');
+  assert.true(params.has('a', 2));
+  assert.true(params.has('a', null));
+  assert.false(params.has('a', 4));
+  assert.true(params.has('b', 4));
+  assert.false(params.has('b', null));
+  assert.true(params.has('b', undefined));
+  assert.false(params.has('c', undefined));
 
   assert.throws(() => {
     return new URLSearchParams('').has();
@@ -825,4 +878,22 @@ QUnit.test('URLSearchParams#@@iterator', assert => {
   assert.same(result, 'a1c3');
 
   if (DESCRIPTORS) assert.true(getOwnPropertyDescriptor(getPrototypeOf(new URLSearchParams()[Symbol.iterator]()), 'next').enumerable, 'enumerable .next');
+});
+
+QUnit.test('URLSearchParams#size', assert => {
+  const params = new URLSearchParams('a=1&b=2&b=3');
+  assert.true('size' in params);
+  assert.same(params.size, 3);
+
+  if (DESCRIPTORS) {
+    assert.true('size' in URLSearchParams.prototype);
+
+    const { enumerable, configurable, get } = getOwnPropertyDescriptor(URLSearchParams.prototype, 'size');
+
+    assert.true(enumerable, 'enumerable');
+    // https://github.com/oven-sh/bun/issues/9251
+    if (!BUN) assert.true(configurable, 'configurable');
+
+    assert.throws(() => get.call([]));
+  }
 });

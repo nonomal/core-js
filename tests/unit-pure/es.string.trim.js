@@ -1,4 +1,4 @@
-import { STRICT, WHITESPACES } from '../helpers/constants';
+import { STRICT, WHITESPACES } from '../helpers/constants.js';
 
 import trim from 'core-js-pure/es/string/trim';
 
@@ -10,7 +10,7 @@ QUnit.test('String#trim', assert => {
 
   /* eslint-disable es/no-symbol -- safe */
   if (typeof Symbol == 'function') {
-    assert.throws(() => trim(Symbol()), 'throws on symbol context');
+    assert.throws(() => trim(Symbol('trim test')), 'throws on symbol context');
   }
 
   if (STRICT) {

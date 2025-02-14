@@ -1,5 +1,5 @@
-import { createAsyncIterable, createIterable } from '../helpers/helpers';
-import { STRICT_THIS } from '../helpers/constants';
+import { createAsyncIterable, createIterable } from '../helpers/helpers.js';
+import { STRICT_THIS } from '../helpers/constants.js';
 
 QUnit.test('Array.fromAsync', assert => {
   const { fromAsync } = Array;
@@ -9,6 +9,15 @@ QUnit.test('Array.fromAsync', assert => {
   assert.name(fromAsync, 'fromAsync');
   assert.looksNative(fromAsync);
   assert.nonEnumerable(Array, 'fromAsync');
+
+  let counter = 0;
+  // eslint-disable-next-line prefer-arrow-callback -- constructor
+  fromAsync.call(function () {
+    counter++;
+    return [];
+  }, { length: 0 });
+
+  assert.same(counter, 1, 'proper number of constructor calling');
 
   function C() { /* empty */ }
 

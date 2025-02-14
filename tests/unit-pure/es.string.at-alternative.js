@@ -1,4 +1,4 @@
-import { STRICT } from '../helpers/constants';
+import { STRICT } from '../helpers/constants.js';
 
 import Symbol from 'core-js-pure/es/symbol';
 import at from 'core-js-pure/es/string/at';
@@ -23,7 +23,7 @@ QUnit.test('String#at', assert => {
   // assert.same('\uD842', at('𠮷'));
   assert.same('1', at({ toString() { return '123'; } }, 0));
 
-  assert.throws(() => at(Symbol(), 0), 'throws on symbol context');
+  assert.throws(() => at(Symbol('at-alternative test'), 0), 'throws on symbol context');
 
   if (STRICT) {
     assert.throws(() => at(null, 0), TypeError);
