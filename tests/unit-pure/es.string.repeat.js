@@ -1,4 +1,4 @@
-import { STRICT } from '../helpers/constants';
+import { STRICT } from '../helpers/constants.js';
 
 import repeat from 'core-js-pure/es/string/repeat';
 
@@ -11,7 +11,7 @@ QUnit.test('String#repeat', assert => {
 
   /* eslint-disable es/no-symbol -- safe */
   if (typeof Symbol == 'function') {
-    assert.throws(() => repeat(Symbol()), 'throws on symbol context');
+    assert.throws(() => repeat(Symbol('repeat test')), 'throws on symbol context');
   }
 
   if (STRICT) {

@@ -16,16 +16,14 @@ await Promise.all(pkgs.map(async path => {
 
   const exclude = ignore[name];
 
-  $.verbose = false;
-
-  const { stdout } = await $`updates \
+  const { stdout } = await $({ verbose: false })`updates \
     --json \
     --file ${ path } \
     --exclude ${ Array.isArray(exclude) ? exclude.join(',') : '' } \
   `;
 
-  const { results } = JSON.parse(stdout);
-  const obsolete = { ...results.dependencies, ...results.devDependencies };
+  const results = JSON.parse(stdout)?.results?.npm;
+  const obsolete = { ...results?.dependencies, ...results?.devDependencies };
 
   if (Object.keys(obsolete).length) {
     echo(chalk.cyan(`${ name }:`));

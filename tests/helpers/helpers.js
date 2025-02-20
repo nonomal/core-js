@@ -4,7 +4,7 @@ import ASYNC_ITERATOR from 'core-js-pure/es/symbol/async-iterator';
 
 export function is(a, b) {
   // eslint-disable-next-line no-self-compare -- NaN check
-  return a === b ? a !== 0 || 1 / a === 1 / b : a != a && b != b;
+  return a === b ? a !== 0 || 1 / a === 1 / b : a !== a && b !== b;
 }
 
 export function createIterator(elements, methods) {
@@ -139,8 +139,8 @@ export function patchRegExp$exec(run) {
   return assert => {
     const originalExec = RegExp.prototype.exec;
     // eslint-disable-next-line no-extend-native -- required for testing
-    RegExp.prototype.exec = function () {
-      return originalExec.apply(this, arguments);
+    RegExp.prototype.exec = function (...args) {
+      return originalExec.apply(this, args);
     };
     try {
       return run(assert);

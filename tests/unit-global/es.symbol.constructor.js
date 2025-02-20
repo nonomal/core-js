@@ -1,4 +1,4 @@
-import { DESCRIPTORS, GLOBAL, NATIVE } from '../helpers/constants';
+import { DESCRIPTORS, GLOBAL, NATIVE } from '../helpers/constants.js';
 
 const {
   defineProperty,
@@ -32,6 +32,13 @@ QUnit.test('Symbol', assert => {
   }
 });
 
+QUnit.test('Symbol as global key', assert => {
+  const TEXT = 'test global symbol key';
+  const symbol = Symbol(TEXT);
+  GLOBAL[symbol] = TEXT;
+  assert.same(GLOBAL[symbol], TEXT, TEXT);
+});
+
 QUnit.test('Well-known Symbols', assert => {
   const wks = [
     'hasInstance',
@@ -60,7 +67,7 @@ QUnit.test('Well-known Symbols', assert => {
 });
 
 QUnit.test('Symbol#@@toPrimitive', assert => {
-  const symbol = Symbol();
+  const symbol = Symbol('Symbol#@@toPrimitive test');
   assert.isFunction(Symbol.prototype[Symbol.toPrimitive]);
   assert.same(symbol, symbol[Symbol.toPrimitive](), 'works');
 });
@@ -234,6 +241,6 @@ if (DESCRIPTORS) {
   });
 
   QUnit.test('Symbol.sham flag', assert => {
-    assert.same(Symbol.sham, typeof Symbol() == 'symbol' ? undefined : true);
+    assert.same(Symbol.sham, typeof Symbol('Symbol.sham flag test') == 'symbol' ? undefined : true);
   });
 }

@@ -1,4 +1,4 @@
-import { STRICT } from '../helpers/constants';
+import { STRICT } from '../helpers/constants.js';
 
 import codePointAt from 'core-js-pure/es/string/code-point-at';
 
@@ -56,7 +56,7 @@ QUnit.test('String#codePointAt', assert => {
 
   /* eslint-disable es/no-symbol -- safe */
   if (typeof Symbol == 'function') {
-    assert.throws(() => codePointAt(Symbol(), 1), 'throws on symbol context');
+    assert.throws(() => codePointAt(Symbol('codePointAt test'), 1), 'throws on symbol context');
   }
 
   if (STRICT) {

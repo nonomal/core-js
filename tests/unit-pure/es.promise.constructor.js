@@ -1,4 +1,4 @@
-import { DESCRIPTORS, GLOBAL, PROTO, STRICT } from '../helpers/constants';
+import { DESCRIPTORS, GLOBAL, PROTO, STRICT } from '../helpers/constants.js';
 
 import Promise from 'core-js-pure/es/promise';
 import Symbol from 'core-js-pure/es/symbol';
@@ -7,14 +7,15 @@ import create from 'core-js-pure/es/object/create';
 
 QUnit.test('Promise', assert => {
   assert.isFunction(Promise);
-  assert.throws(() => {
-    Promise();
-  }, 'throws w/o `new`');
   new Promise(function (resolve, reject) {
     assert.isFunction(resolve, 'resolver is function');
     assert.isFunction(reject, 'rejector is function');
     if (STRICT) assert.same(this, undefined, 'correct executor context');
   });
+  assert.throws(() => {
+    // eslint-disable-next-line sonarjs/inconsistent-function-call -- required for testing
+    Promise();
+  }, 'throws w/o `new`');
 });
 
 if (DESCRIPTORS) QUnit.test('Promise operations order', assert => {
@@ -30,7 +31,7 @@ if (DESCRIPTORS) QUnit.test('Promise operations order', assert => {
     // eslint-disable-next-line unicorn/no-thenable -- required for testing
     then() {
       result += 'A';
-      throw Error();
+      throw new Error();
     },
   });
   promise1.catch(() => {
@@ -48,7 +49,7 @@ if (DESCRIPTORS) QUnit.test('Promise operations order', assert => {
   $resolve2(Object.defineProperty({}, 'then', {
     get() {
       result += 'D';
-      throw Error();
+      throw new Error();
     },
   }));
   result += 'E';
@@ -73,7 +74,7 @@ QUnit.test('Promise#then', assert => {
   let promise = new Promise(resolve => {
     resolve(42);
   });
-  let FakePromise1 = promise.constructor = function (executor) {
+  const FakePromise1 = promise.constructor = function (executor) {
     executor(() => { /* empty */ }, () => { /* empty */ });
   };
   const FakePromise2 = FakePromise1[Symbol.species] = function (executor) {
@@ -83,27 +84,27 @@ QUnit.test('Promise#then', assert => {
   promise = new Promise(resolve => {
     resolve(42);
   });
-  promise.constructor = FakePromise1 = function (executor) {
+  promise.constructor = function (executor) {
     executor(() => { /* empty */ }, () => { /* empty */ });
   };
   assert.true(promise.then(() => { /* empty */ }) instanceof Promise, 'subclassing, incorrect `this` pattern');
   promise = new Promise(resolve => {
     resolve(42);
   });
-  promise.constructor = FakePromise1 = function (executor) {
+  const FakePromise3 = promise.constructor = function (executor) {
     executor(() => { /* empty */ }, () => { /* empty */ });
   };
-  FakePromise1[Symbol.species] = function () { /* empty */ };
+  FakePromise3[Symbol.species] = function () { /* empty */ };
   assert.throws(() => {
     promise.then(() => { /* empty */ });
   }, 'NewPromiseCapability validations, #1');
-  FakePromise1[Symbol.species] = function (executor) {
+  FakePromise3[Symbol.species] = function (executor) {
     executor(null, () => { /* empty */ });
   };
   assert.throws(() => {
     promise.then(() => { /* empty */ });
   }, 'NewPromiseCapability validations, #2');
-  FakePromise1[Symbol.species] = function (executor) {
+  FakePromise3[Symbol.species] = function (executor) {
     executor(() => { /* empty */ }, null);
   };
   assert.throws(() => {

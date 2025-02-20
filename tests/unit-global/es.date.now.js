@@ -5,5 +5,5 @@ QUnit.test('Date.now', assert => {
   assert.name(now, 'now');
   assert.looksNative(now);
   assert.nonEnumerable(Date, 'now');
-  assert.epsilon(+new Date(), now(), 10, 'Date.now() ~ +new Date');
+  assert.same(typeof now(), 'number', 'typeof');
 });

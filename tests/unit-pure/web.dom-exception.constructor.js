@@ -1,4 +1,4 @@
-import { DESCRIPTORS, NODE } from '../helpers/constants';
+import { DESCRIPTORS, NODE } from '../helpers/constants.js';
 import DOMException from 'core-js-pure/stable/dom-exception';
 import Symbol from 'core-js-pure/es/symbol';
 
@@ -30,7 +30,7 @@ const errors = {
   DataCloneError: { s: 'DATA_CLONE_ERR', c: 25, m: 1 },
 };
 
-const HAS_STACK = 'stack' in Error('1');
+const HAS_STACK = 'stack' in new Error('1');
 
 QUnit.test('DOMException', assert => {
   assert.isFunction(DOMException);
@@ -67,9 +67,11 @@ QUnit.test('DOMException', assert => {
     assert.same(DOMException.prototype[errors[name].s], errors[name].c, `DOMException.prototype.${ errors[name].s }`);
   }
 
+  // eslint-disable-next-line sonarjs/inconsistent-function-call -- required for testing
   assert.throws(() => DOMException(42, 'DataCloneError'), "DOMException(42, 'DataCloneError')");
-  assert.throws(() => new DOMException(Symbol(), 'DataCloneError'), "new DOMException(Symbol(), 'DataCloneError')");
-  assert.throws(() => new DOMException(42, Symbol()), 'new DOMException(42, Symbol())');
+  const symbol = Symbol('DOMException constructor test');
+  assert.throws(() => new DOMException(symbol, 'DataCloneError'), "new DOMException(Symbol(), 'DataCloneError')");
+  assert.throws(() => new DOMException(42, symbol), 'new DOMException(42, Symbol())');
   if (DESCRIPTORS) {
     // assert.throws(() => DOMException.prototype.message, 'DOMException.prototype.message'); // FF55- , Safari 10.1 bug
     // assert.throws(() => DOMException.prototype.name, 'DOMException.prototype.name'); // FF55-, Safari 10.1 bug bug

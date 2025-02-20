@@ -1,4 +1,4 @@
-import { createConversionChecker } from '../helpers/helpers';
+import { createConversionChecker } from '../helpers/helpers.js';
 
 QUnit.test('Math.expm1', assert => {
   const { expm1 } = Math;
@@ -12,11 +12,11 @@ QUnit.test('Math.expm1', assert => {
   assert.same(expm1(-0), -0);
   assert.same(expm1(Infinity), Infinity);
   assert.same(expm1(-Infinity), -1);
-  assert.epsilon(expm1(10), 22025.465794806718);
-  assert.epsilon(expm1(-10), -0.9999546000702375);
+  assert.closeTo(expm1(10), 22025.465794806718, 1e-11);
+  assert.closeTo(expm1(-10), -0.9999546000702375, 1e-11);
 
   const checker = createConversionChecker(10);
-  assert.epsilon(expm1(checker), 22025.465794806718);
+  assert.closeTo(expm1(checker), 22025.465794806718, 1e-11);
   assert.same(checker.$valueOf, 1, 'valueOf calls');
   assert.same(checker.$toString, 0, 'toString calls');
 });

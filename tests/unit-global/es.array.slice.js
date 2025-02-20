@@ -1,4 +1,4 @@
-import { GLOBAL, STRICT } from '../helpers/constants';
+import { GLOBAL, STRICT } from '../helpers/constants.js';
 
 QUnit.test('Array#slice', assert => {
   const { slice } = Array.prototype;
@@ -35,5 +35,6 @@ QUnit.test('Array#slice', assert => {
   array.constructor = { [Symbol.species]: function () {
     return { foo: 1 };
   } };
+  // eslint-disable-next-line es/no-nonstandard-array-prototype-properties -- @@species
   assert.same(array.slice().foo, 1, '@@species');
 });

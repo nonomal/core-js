@@ -1,5 +1,5 @@
-import { createAsyncIterable, createIterable } from '../helpers/helpers';
-import { STRICT_THIS } from '../helpers/constants';
+import { createAsyncIterable, createIterable } from '../helpers/helpers.js';
+import { STRICT_THIS } from '../helpers/constants.js';
 
 import Promise from 'core-js-pure/es/promise';
 import fromAsync from 'core-js-pure/actual/array/from-async';
@@ -8,6 +8,15 @@ QUnit.test('Array.fromAsync', assert => {
   assert.isFunction(fromAsync);
   assert.arity(fromAsync, 1);
   assert.name(fromAsync, 'fromAsync');
+
+  let counter = 0;
+  // eslint-disable-next-line prefer-arrow-callback -- constructor
+  fromAsync.call(function () {
+    counter++;
+    return [];
+  }, { length: 0 });
+
+  assert.same(counter, 1, 'proper number of constructor calling');
 
   function C() { /* empty */ }
 

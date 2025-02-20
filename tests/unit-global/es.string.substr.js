@@ -1,4 +1,4 @@
-import { STRICT } from '../helpers/constants';
+import { STRICT } from '../helpers/constants.js';
 
 QUnit.test('String#substr', assert => {
   const { substr } = String.prototype;
@@ -13,7 +13,7 @@ QUnit.test('String#substr', assert => {
   assert.same('ab'.substr(-1), 'b');
 
   if (typeof Symbol == 'function' && !Symbol.sham) {
-    assert.throws(() => substr.call(Symbol(), 1, 3), 'throws on symbol context');
+    assert.throws(() => substr.call(Symbol('substr test'), 1, 3), 'throws on symbol context');
   }
 
   if (STRICT) {

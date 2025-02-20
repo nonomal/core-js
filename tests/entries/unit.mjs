@@ -1,5 +1,5 @@
 /* eslint-disable import/no-dynamic-require, node/global-require -- required */
-import { ok } from 'assert';
+import { ok } from 'node:assert/strict';
 
 const entries = await fs.readJson('packages/core-js-compat/entries.json');
 const expected = new Set(Object.keys(entries));
@@ -25,8 +25,9 @@ for (PATH of ['core-js-pure', 'core-js']) {
     ok(load(NS, 'object/freeze')({}));
     ok(load(NS, 'object/get-own-property-descriptor')({ q: 1 }, 'q').enumerable);
     ok(load(NS, 'object/get-own-property-names')({ q: 42 })[0] === 'q');
-    ok(load(NS, 'object/get-own-property-symbols')({ [Symbol()]: 42 }).length === 1);
+    ok(load(NS, 'object/get-own-property-symbols')({ [Symbol('getOwnPropertySymbols test')]: 42 }).length === 1);
     ok(load(NS, 'object/get-prototype-of')([]) === Array.prototype);
+    ok(load(NS, 'object/group-by')([1, 2, 3, 4, 5], it => it % 2 === 0 ? 'even' : 'odd').odd.length === 3);
     ok(load(NS, 'object/has-own')({ foo: 42 }, 'foo'));
     ok(load(NS, 'object/is')(NaN, NaN));
     ok(load(NS, 'object/is-extensible')({}));
@@ -134,9 +135,9 @@ for (PATH of ['core-js-pure', 'core-js']) {
     ok('map' in load(NS, 'array/virtual'));
     ok('from' in load(NS, 'array'));
     ok(load(NS, 'array/splice')([1, 2, 3], 1, 2)[0] === 2);
-    ok(load(NS, 'error/constructor').Error(1, { cause: 7 }).cause === 7);
+    ok(new (load(NS, 'error/constructor').Error)(1, { cause: 7 }).cause === 7);
     ok(typeof load(NS, 'error/to-string') == 'function');
-    ok(load(NS, 'error').Error(1, { cause: 7 }).cause === 7);
+    ok(new (load(NS, 'error').Error)(1, { cause: 7 }).cause === 7);
     ok(load(NS, 'math/acosh')(1) === 0);
     ok(Object.is(load(NS, 'math/asinh')(-0), -0));
     ok(load(NS, 'math/atanh')(1) === Infinity);
@@ -145,6 +146,7 @@ for (PATH of ['core-js-pure', 'core-js']) {
     ok(load(NS, 'math/cosh')(0) === 1);
     ok(load(NS, 'math/expm1')(-Infinity) === -1);
     ok(load(NS, 'math/fround')(0) === 0);
+    ok(load(NS, 'math/f16round')(1.337) === 1.3369140625);
     ok(load(NS, 'math/hypot')(3, 4) === 5);
     ok(load(NS, 'math/imul')(2, 2) === 4);
     ok(load(NS, 'math/log10')(-0) === -Infinity);
@@ -225,6 +227,8 @@ for (PATH of ['core-js-pure', 'core-js']) {
     ok(typeof load(NS, 'string/replace-all') == 'function');
     ok(load(NS, 'string/pad-start')('a', 3) === '  a');
     ok(load(NS, 'string/pad-end')('a', 3) === 'a  ');
+    ok(load(NS, 'string/is-well-formed')('a'));
+    ok(load(NS, 'string/to-well-formed')('a') === 'a');
     ok('next' in load(NS, 'string/iterator')('qwe'));
     ok(load(NS, 'string/virtual/at').call('a', 0) === 'a');
     ok(load(NS, 'string/virtual/code-point-at').call('a', 0) === 97);
@@ -255,10 +259,13 @@ for (PATH of ['core-js-pure', 'core-js']) {
     ok(typeof load(NS, 'string/virtual/sup') == 'function');
     ok(load(NS, 'string/virtual/pad-start').call('a', 3) === '  a');
     ok(load(NS, 'string/virtual/pad-end').call('a', 3) === 'a  ');
+    ok(load(NS, 'string/virtual/is-well-formed').call('a'));
+    ok(load(NS, 'string/virtual/to-well-formed').call('a') === 'a');
     ok('next' in load(NS, 'string/virtual/iterator').call('qwe'));
     ok('padEnd' in load(NS, 'string/virtual'));
     ok('raw' in load(NS, 'string'));
     ok(String(load(NS, 'regexp/constructor')('a', 'g')) === '/a/g');
+    ok(load(NS, 'regexp/escape')('10$') === '\\x310\\$');
     ok(load(NS, 'regexp/to-string')(/./g) === '/./g');
     ok(load(NS, 'regexp/flags')(/./g) === 'g');
     ok(typeof load(NS, 'regexp/match') == 'function');
@@ -303,6 +310,7 @@ for (PATH of ['core-js-pure', 'core-js']) {
     ok(load(NS, 'symbol/async-iterator'));
     load(NS, 'symbol/description');
     const Map = load(NS, 'map');
+    ok(load(NS, 'map/group-by')([], it => it) instanceof load(NS, 'map'));
     const Set = load(NS, 'set');
     const WeakMap = load(NS, 'weak-map');
     const WeakSet = load(NS, 'weak-set');
@@ -310,15 +318,37 @@ for (PATH of ['core-js-pure', 'core-js']) {
     ok(new Set([1, 2, 3, 2, 1]).size === 3);
     ok(new WeakMap([[O = {}, 42]]).get(O) === 42);
     ok(new WeakSet([O = {}]).has(O));
+    ok(load(NS, 'set/difference')(new Set([1, 2, 3]), new Set([3, 4, 5])).size === 2);
+    ok(load(NS, 'set/intersection')(new Set([1, 2, 3]), new Set([1, 3, 4])).size === 2);
+    ok(load(NS, 'set/is-disjoint-from')(new Set([1, 2, 3]), new Set([4, 5, 6])));
+    ok(load(NS, 'set/is-subset-of')(new Set([1, 2, 3]), new Set([1, 2, 3, 4])));
+    ok(load(NS, 'set/is-superset-of')(new Set([1, 2, 3, 4]), new Set([1, 2, 3])));
+    ok(load(NS, 'set/symmetric-difference')(new Set([1, 2, 3]), new Set([3, 4, 5])).size === 4);
+    ok(load(NS, 'set/union')(new Set([1, 2, 3]), new Set([3, 4, 5])).size === 5);
     const Promise = load(NS, 'promise');
     ok('then' in Promise.prototype);
     ok(load(NS, 'promise/all-settled')([1, 2, 3]) instanceof Promise);
     ok(load(NS, 'promise/any')([1, 2, 3]) instanceof Promise);
     ok(load(NS, 'promise/finally')(new Promise(resolve => resolve), it => it) instanceof Promise);
+    ok(load(NS, 'promise/try')(() => 42) instanceof Promise);
+    ok(load(NS, 'promise/with-resolvers')().promise instanceof load(NS, 'promise'));
     ok(load(NS, 'is-iterable')([]));
     ok(typeof load(NS, 'get-iterator-method')([]) == 'function');
     ok('next' in load(NS, 'get-iterator')([]));
     ok('Map' in load(NS));
+    ok(typeof load(NS, 'iterator') == 'function');
+    ok(typeof load(NS, 'iterator/drop') == 'function');
+    ok(typeof load(NS, 'iterator/every') == 'function');
+    ok(typeof load(NS, 'iterator/filter') == 'function');
+    ok(typeof load(NS, 'iterator/find') == 'function');
+    ok(typeof load(NS, 'iterator/flat-map') == 'function');
+    ok(typeof load(NS, 'iterator/for-each') == 'function');
+    ok(typeof load(NS, 'iterator/from') == 'function');
+    ok(typeof load(NS, 'iterator/map') == 'function');
+    ok(typeof load(NS, 'iterator/reduce') == 'function');
+    ok(typeof load(NS, 'iterator/some') == 'function');
+    ok(typeof load(NS, 'iterator/take') == 'function');
+    ok(typeof load(NS, 'iterator/to-array') == 'function');
 
     const instanceAt = load(NS, 'instance/at');
     ok(typeof instanceAt == 'function');
@@ -448,6 +478,12 @@ for (PATH of ['core-js-pure', 'core-js']) {
     ok(typeof instanceKeys([]) == 'function');
     ok(instanceKeys([]).call([1, 2, 3]).next().value === 0);
 
+    const instanceIsWellFormed = load(NS, 'instance/is-well-formed');
+    ok(typeof instanceIsWellFormed == 'function');
+    ok(instanceIsWellFormed({}) === undefined);
+    ok(typeof instanceIsWellFormed('') == 'function');
+    ok(instanceIsWellFormed('').call('a'));
+
     const instanceLastIndexOf = load(NS, 'instance/last-index-of');
     ok(typeof instanceLastIndexOf == 'function');
     ok(instanceLastIndexOf({}) === undefined);
@@ -464,7 +500,7 @@ for (PATH of ['core-js-pure', 'core-js']) {
     ok(typeof instanceMatchAll == 'function');
     ok(instanceMatchAll({}) === undefined);
     ok(typeof instanceMatchAll('') == 'function');
-    ok(instanceMatchAll('').call('test1test2', /t(e)(st(\d?))/g).next().value[0] === 'test1');
+    ok(instanceMatchAll('').call('test1test2', /(?<test>test\d)/g).next().value.groups.test === 'test1');
 
     const instancePadEnd = load(NS, 'instance/pad-end');
     ok(typeof instancePadEnd == 'function');
@@ -558,6 +594,12 @@ for (PATH of ['core-js-pure', 'core-js']) {
     ok(typeof instanceToSpliced([]) == 'function');
     ok(instanceToSpliced([]).call([3, 2, 1], 1, 1, 4, 5).length === 4);
 
+    const instanceToWellFormed = load(NS, 'instance/to-well-formed');
+    ok(typeof instanceToWellFormed == 'function');
+    ok(instanceToWellFormed({}) === undefined);
+    ok(typeof instanceToWellFormed('') == 'function');
+    ok(instanceToWellFormed('').call('a') === 'a');
+
     const instanceTrimEnd = load(NS, 'instance/trim-end');
     ok(typeof instanceTrimEnd == 'function');
     ok(instanceTrimEnd({}) === undefined);
@@ -626,6 +668,8 @@ for (PATH of ['core-js-pure', 'core-js']) {
     ok(typeof load(NS, 'clear-immediate') == 'function');
     ok(typeof load(NS, 'queue-microtask') == 'function');
     ok(typeof load(NS, 'url') == 'function');
+    ok(load(NS, 'url/can-parse')('a:b') === true);
+    ok(load(NS, 'url/parse')('a:b').href === 'a:b');
     load(NS, 'url/to-json');
     ok(typeof load(NS, 'url-search-params') == 'function');
   }
@@ -640,9 +684,6 @@ for (PATH of ['core-js-pure', 'core-js']) {
     ok(typeof load(NS, 'array/virtual/group-to-map') == 'function');
     ok(typeof load(NS, 'array/virtual/group-by') == 'function');
     ok(typeof load(NS, 'array/virtual/group-by-to-map') == 'function');
-    load(NS, 'array-buffer/detached');
-    load(NS, 'array-buffer/transfer');
-    load(NS, 'array-buffer/transfer-to-fixed-length');
     ok(typeof load(NS, 'async-iterator') == 'function');
     ok(typeof load(NS, 'async-iterator/drop') == 'function');
     ok(typeof load(NS, 'async-iterator/every') == 'function');
@@ -656,39 +697,23 @@ for (PATH of ['core-js-pure', 'core-js']) {
     ok(typeof load(NS, 'async-iterator/some') == 'function');
     ok(typeof load(NS, 'async-iterator/take') == 'function');
     ok(typeof load(NS, 'async-iterator/to-array') == 'function');
-    ok(typeof load(NS, 'iterator') == 'function');
-    ok(typeof load(NS, 'iterator/drop') == 'function');
-    ok(typeof load(NS, 'iterator/every') == 'function');
-    ok(typeof load(NS, 'iterator/filter') == 'function');
-    ok(typeof load(NS, 'iterator/find') == 'function');
-    ok(typeof load(NS, 'iterator/flat-map') == 'function');
-    ok(typeof load(NS, 'iterator/for-each') == 'function');
-    ok(typeof load(NS, 'iterator/from') == 'function');
-    ok(typeof load(NS, 'iterator/map') == 'function');
-    ok(typeof load(NS, 'iterator/reduce') == 'function');
-    ok(typeof load(NS, 'iterator/some') == 'function');
-    ok(typeof load(NS, 'iterator/take') == 'function');
-    ok(typeof load(NS, 'iterator/to-array') == 'function');
+    ok(load(NS, 'error/is-error')(new Error()));
+    ok(load(NS, 'function/metadata') === null);
     ok(typeof load(NS, 'iterator/to-async') == 'function');
     ok(load(NS, 'json/is-raw-json')({}) === false);
     ok(load(NS, 'json/parse')('[42]', (key, value, { source }) => typeof value == 'number' ? source + source : value)[0] === '4242');
     ok(typeof load(NS, 'json/raw-json')(42) == 'object');
-    ok(load(NS, 'set/difference')(new Set([1, 2, 3]), new Set([3, 4, 5])).size === 2);
-    ok(load(NS, 'set/intersection')(new Set([1, 2, 3]), new Set([1, 3, 4])).size === 2);
-    ok(load(NS, 'set/is-disjoint-from')(new Set([1, 2, 3]), new Set([4, 5, 6])));
-    ok(load(NS, 'set/is-subset-of')(new Set([1, 2, 3]), new Set([1, 2, 3, 4])));
-    ok(load(NS, 'set/is-superset-of')(new Set([1, 2, 3, 4]), new Set([1, 2, 3])));
-    ok(load(NS, 'set/symmetric-difference')(new Set([1, 2, 3]), new Set([3, 4, 5])).size === 4);
-    ok(load(NS, 'set/union')(new Set([1, 2, 3]), new Set([3, 4, 5])).size === 5);
-    ok(load(NS, 'string/is-well-formed')('a'));
-    ok(load(NS, 'string/virtual/is-well-formed').call('a'));
-    ok(load(NS, 'string/to-well-formed')('a') === 'a');
-    ok(load(NS, 'string/virtual/to-well-formed').call('a') === 'a');
+    ok(load(NS, 'math/sum-precise')([1, 2, 3]) === 6);
     ok(load(NS, 'symbol/dispose'));
+    ok(load(NS, 'symbol/metadata'));
     ok(new (load(NS, 'suppressed-error'))(1, 2).suppressed === 2);
     ok(typeof load(NS, 'disposable-stack') == 'function');
     ok(typeof load(NS, 'disposable-stack/constructor') == 'function');
     load(NS, 'iterator/dispose');
+    ok(load(NS, 'symbol/async-dispose'));
+    load(NS, 'async-iterator/async-dispose');
+    ok(typeof load(NS, 'async-disposable-stack') == 'function');
+    ok(typeof load(NS, 'async-disposable-stack/constructor') == 'function');
 
     const instanceGroup = load(NS, 'instance/group');
     ok(typeof instanceGroup == 'function');
@@ -713,18 +738,6 @@ for (PATH of ['core-js-pure', 'core-js']) {
     ok(instanceGroupByToMap({}) === undefined);
     ok(typeof instanceGroupByToMap([]) == 'function');
     ok(instanceGroupByToMap([]).call([1, 2, 3], it => it % 2).get(1).length === 2);
-
-    const instanceIsWellFormed = load(NS, 'instance/is-well-formed');
-    ok(typeof instanceIsWellFormed == 'function');
-    ok(instanceIsWellFormed({}) === undefined);
-    ok(typeof instanceIsWellFormed('') == 'function');
-    ok(instanceIsWellFormed('').call('a'));
-
-    const instanceToWellFormed = load(NS, 'instance/to-well-formed');
-    ok(typeof instanceToWellFormed == 'function');
-    ok(instanceToWellFormed({}) === undefined);
-    ok(typeof instanceToWellFormed('') == 'function');
-    ok(instanceToWellFormed('').call('a') === 'a');
   }
 
   for (const NS of ['full', 'features']) {
@@ -745,6 +758,8 @@ for (PATH of ['core-js-pure', 'core-js']) {
     ok(typeof load(NS, 'async-iterator/indexed') == 'function');
     load(NS, 'bigint/range');
     load(NS, 'bigint');
+    load(NS, 'data-view/get-uint8-clamped');
+    load(NS, 'data-view/set-uint8-clamped');
     ok(typeof load(NS, 'composite-key')({}, 1, {}) === 'object');
     ok(typeof load(NS, 'composite-symbol')({}, 1, {}) === 'symbol');
     ok(load(NS, 'function/demethodize')([].slice)([1, 2, 3], 1)[0] === 2);
@@ -755,6 +770,7 @@ for (PATH of ['core-js-pure', 'core-js']) {
     ok(load(NS, 'function/virtual/un-this').call([].slice)([1, 2, 3], 1)[0] === 2);
     ok(typeof load(NS, 'iterator/as-indexed-pairs') == 'function');
     ok(typeof load(NS, 'iterator/indexed') == 'function');
+    ok(load(NS, 'iterator/concat')([2]).next().value === 2);
     ok(load(NS, 'iterator/range')(1, 2).next().value === 1);
     ok(load(NS, 'map/delete-all')(new Map(), 1, 2) === false);
     ok(load(NS, 'map/emplace')(new Map([[1, 2]]), 1, { update: it => it ** 2 }) === 4);
@@ -763,7 +779,8 @@ for (PATH of ['core-js-pure', 'core-js']) {
     ok(load(NS, 'map/find')(new Map([[1, 2], [2, 3], [3, 4]]), it => it % 2) === 3);
     ok(load(NS, 'map/find-key')(new Map([[1, 2], [2, 3], [3, 4]]), it => it % 2) === 2);
     ok(load(NS, 'map/from')([[1, 2], [3, 4]]) instanceof Map);
-    ok(load(NS, 'map/group-by')([], it => it) instanceof Map);
+    ok(load(NS, 'map/get-or-insert')(new Map([[1, 2]]), 1, 3) === 2);
+    ok(load(NS, 'map/get-or-insert-computed')(new Map([[1, 2]]), 1, key => key) === 2);
     ok(load(NS, 'map/includes')(new Map([[1, 2]]), 2), true);
     ok(load(NS, 'map/key-by')([], it => it) instanceof Map);
     ok(load(NS, 'map/key-of')(new Map([[1, 2]]), 2), 1);
@@ -804,7 +821,6 @@ for (PATH of ['core-js-pure', 'core-js']) {
     ok(typeof load(NS, 'reflect/has-metadata') == 'function');
     ok(typeof load(NS, 'reflect/has-own-metadata') == 'function');
     ok(typeof load(NS, 'reflect/metadata') == 'function');
-    ok(load(NS, 'promise/try')(() => 42) instanceof load(NS, 'promise'));
     ok(load(NS, 'set/add-all')(new Set([1, 2, 3]), 4, 5).size === 5);
     ok(load(NS, 'set/delete-all')(new Set([1, 2, 3]), 4, 5) === false);
     ok(load(NS, 'set/every')(new Set([1, 2, 3]), it => typeof it == 'number'));
@@ -822,16 +838,20 @@ for (PATH of ['core-js-pure', 'core-js']) {
     ` === 'a1b');
     ok('next' in load(NS, 'string/code-points')('a'));
     ok('next' in load(NS, 'string/virtual/code-points').call('a'));
+    ok(load(NS, 'symbol/custom-matcher'));
+    ok(load(NS, 'symbol/is-registered-symbol')(1) === false);
+    ok(load(NS, 'symbol/is-well-known-symbol')(1) === false);
     ok(load(NS, 'symbol/is-registered')(1) === false);
     ok(load(NS, 'symbol/is-well-known')(1) === false);
     ok(load(NS, 'symbol/matcher'));
-    ok(load(NS, 'symbol/metadata'));
     ok(load(NS, 'symbol/metadata-key'));
     ok(load(NS, 'symbol/observable'));
     ok(load(NS, 'symbol/pattern-match'));
     ok(load(NS, 'symbol/replace-all'));
     ok(load(NS, 'weak-map/delete-all')(new WeakMap(), [], {}) === false);
     ok(load(NS, 'weak-map/emplace')(new WeakMap(), {}, { insert: () => ({ a: 42 }) }).a === 42);
+    ok(load(NS, 'weak-map/get-or-insert')(new WeakMap([[{}, 2]]), {}, 3) === 3);
+    ok(load(NS, 'weak-map/get-or-insert-computed')(new WeakMap([[{}, 2]]), {}, () => 3) === 3);
     ok(load(NS, 'weak-map/upsert')(new WeakMap(), {}, null, () => 42) === 42);
     ok(load(NS, 'weak-map/from')([[{}, 1], [[], 2]]) instanceof WeakMap);
     ok(load(NS, 'weak-map/of')([{}, 1], [[], 2]) instanceof WeakMap);
@@ -839,10 +859,6 @@ for (PATH of ['core-js-pure', 'core-js']) {
     ok(load(NS, 'weak-set/delete-all')(new WeakSet(), [], {}) === false);
     ok(load(NS, 'weak-set/from')([{}, []]) instanceof WeakSet);
     ok(load(NS, 'weak-set/of')({}, []) instanceof WeakSet);
-    ok(load(NS, 'symbol/async-dispose'));
-    load(NS, 'async-iterator/async-dispose');
-    ok(typeof load(NS, 'async-disposable-stack') == 'function');
-    ok(typeof load(NS, 'async-disposable-stack/constructor') == 'function');
 
     const instanceCodePoints = load(NS, 'instance/code-points');
     ok(typeof instanceCodePoints == 'function');
@@ -891,10 +907,12 @@ for (PATH of ['core-js-pure', 'core-js']) {
   load('proposals/array-grouping');
   load('proposals/array-grouping-stage-3');
   load('proposals/array-grouping-stage-3-2');
+  load('proposals/array-grouping-v2');
   load('proposals/array-includes');
   load('proposals/array-is-template-object');
   load('proposals/array-last');
   load('proposals/array-unique');
+  load('proposals/array-buffer-base64');
   load('proposals/array-buffer-transfer');
   load('proposals/async-explicit-resource-management');
   load('proposals/async-iteration');
@@ -903,26 +921,35 @@ for (PATH of ['core-js-pure', 'core-js']) {
   load('proposals/change-array-by-copy-stage-4');
   load('proposals/collection-methods');
   load('proposals/collection-of-from');
+  load('proposals/data-view-get-set-uint8-clamped');
   load('proposals/decorator-metadata');
+  load('proposals/decorator-metadata-v2');
   load('proposals/decorators');
   load('proposals/efficient-64-bit-arithmetic');
   load('proposals/error-cause');
   load('proposals/explicit-resource-management');
+  load('proposals/extractors');
+  load('proposals/float16');
   load('proposals/function-demethodize');
   load('proposals/function-is-callable-is-constructor');
   load('proposals/function-un-this');
   load('proposals/global-this');
+  load('proposals/is-error');
   load('proposals/iterator-helpers');
   load('proposals/iterator-helpers-stage-3');
   load('proposals/iterator-helpers-stage-3-2');
   load('proposals/iterator-range');
+  load('proposals/iterator-sequencing');
   load('proposals/json-parse-with-source');
   load('proposals/keys-composition');
   load('proposals/map-update-or-insert');
   load('proposals/map-upsert');
   load('proposals/map-upsert-stage-2');
+  load('proposals/map-upsert-v4');
+  load('proposals/math-clamp');
   load('proposals/math-extensions');
   load('proposals/math-signbit');
+  load('proposals/math-sum');
   load('proposals/number-from-string');
   load('proposals/number-range');
   load('proposals/object-from-entries');
@@ -931,12 +958,15 @@ for (PATH of ['core-js-pure', 'core-js']) {
   load('proposals/object-values-entries');
   load('proposals/observable');
   load('proposals/pattern-matching');
+  load('proposals/pattern-matching-v2');
   load('proposals/promise-all-settled');
   load('proposals/promise-any');
   load('proposals/promise-finally');
   load('proposals/promise-try');
+  load('proposals/promise-with-resolvers');
   load('proposals/reflect-metadata');
   load('proposals/regexp-dotall-flag');
+  load('proposals/regexp-escaping');
   load('proposals/regexp-named-groups');
   load('proposals/relative-indexing-method');
   load('proposals/seeded-random');
@@ -953,6 +983,7 @@ for (PATH of ['core-js-pure', 'core-js']) {
   load('proposals/string-replace-all-stage-4');
   load('proposals/symbol-description');
   load('proposals/symbol-predicates');
+  load('proposals/symbol-predicates-v2');
   load('proposals/url');
   load('proposals/using-statement');
   load('proposals/well-formed-stringify');
@@ -961,6 +992,7 @@ for (PATH of ['core-js-pure', 'core-js']) {
 
   ok(load('stage/4'));
   ok(load('stage/3'));
+  ok(load('stage/2.7'));
   ok(load('stage/2'));
   ok(load('stage/1'));
   ok(load('stage/0'));
@@ -996,7 +1028,12 @@ for (const NS of ['es', 'stable', 'actual', 'full', 'features']) {
   ok(typeof load(NS, 'array-buffer/constructor') == 'function');
   ok(typeof load(NS, 'array-buffer/is-view') == 'function');
   load(NS, 'array-buffer/slice');
+  load(NS, 'array-buffer/detached');
+  load(NS, 'array-buffer/transfer');
+  load(NS, 'array-buffer/transfer-to-fixed-length');
   ok(typeof load(NS, 'data-view') == 'function');
+  load(NS, 'data-view/get-float16');
+  load(NS, 'data-view/set-float16');
   ok(typeof load(NS, 'typed-array/int8-array') == 'function');
   ok(typeof load(NS, 'typed-array/uint8-array') == 'function');
   ok(typeof load(NS, 'typed-array/uint8-clamped-array') == 'function');
@@ -1045,6 +1082,12 @@ for (const NS of ['es', 'stable', 'actual', 'full', 'features']) {
 }
 
 for (const NS of ['actual', 'full', 'features']) {
+  load(NS, 'typed-array/from-base64');
+  load(NS, 'typed-array/from-hex');
+  load(NS, 'typed-array/set-from-base64');
+  load(NS, 'typed-array/set-from-hex');
+  load(NS, 'typed-array/to-base64');
+  load(NS, 'typed-array/to-hex');
   load(NS, 'typed-array/to-spliced');
 }
 
