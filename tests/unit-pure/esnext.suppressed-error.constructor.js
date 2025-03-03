@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/throw-new-error, sonarjs/inconsistent-function-call -- testing */
 import SuppressedError from 'core-js-pure/actual/suppressed-error';
 import Symbol from 'core-js-pure/es/symbol';
 import toString from 'core-js-pure/es/object/to-string';
@@ -39,7 +40,7 @@ QUnit.test('SuppressedError', assert => {
   assert.same(error2.cause, undefined);
   assert.same(error2.name, 'SuppressedError');
 
-  assert.throws(() => SuppressedError(1, 2, Symbol()), 'throws on symbol as a message');
+  assert.throws(() => SuppressedError(1, 2, Symbol('SuppressedError constructor test')), 'throws on symbol as a message');
   assert.same(toString(SuppressedError()), '[object Error]', 'Object#toString');
 
   // eslint-disable-next-line no-prototype-builtins -- safe

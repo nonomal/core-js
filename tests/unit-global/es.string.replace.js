@@ -1,6 +1,6 @@
-/* eslint-disable regexp/no-unused-capturing-group -- required for testing */
-import { GLOBAL, NATIVE, STRICT } from '../helpers/constants';
-import { patchRegExp$exec } from '../helpers/helpers';
+/* eslint-disable prefer-regex-literals, regexp/no-unused-capturing-group, sonarjs/slow-regex, unicorn/prefer-string-replace-all -- required for testing */
+import { GLOBAL, NATIVE, STRICT } from '../helpers/constants.js';
+import { patchRegExp$exec } from '../helpers/helpers.js';
 
 const Symbol = GLOBAL.Symbol || {};
 
@@ -130,7 +130,7 @@ const run = assert => {
   // eslint-disable-next-line regexp/prefer-escape-replacement-dollar-char -- required for testing
   assert.same('a'.replace(/(.)/, '$0'), '$0');
 
-  assert.throws(() => ''.replace.call(Symbol(), /./, ''), 'throws on symbol context');
+  assert.throws(() => ''.replace.call(Symbol('replace test'), /./, ''), 'throws on symbol context');
 };
 
 QUnit.test('String#replace regression', run);
@@ -170,9 +170,9 @@ QUnit.test('String.replace delegates to @@replace', assert => {
 });
 
 QUnit.test('RegExp#@@replace delegates to exec', assert => {
-  const exec = function () {
+  const exec = function (...args) {
     execCalled = true;
-    return /./.exec.apply(this, arguments);
+    return /./.exec.apply(this, args);
   };
 
   let execCalled = false;
@@ -220,7 +220,10 @@ QUnit.test('RegExp#@@replace correctly handles substitutions', assert => {
   assert.same('1234'.replace(re, '$x'), '1$x4');
 
   let args;
-  assert.same('1234'.replace(re, (..._args) => { args = _args; return 'x'; }), '1x4');
+  assert.same('1234'.replace(re, (...$args) => {
+    args = $args;
+    return 'x';
+  }), '1x4');
   assert.deepEqual(args, ['23', '7', 1, '1234', { '!!!': '7' }]);
 });
 

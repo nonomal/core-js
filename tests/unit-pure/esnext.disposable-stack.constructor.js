@@ -1,4 +1,4 @@
-import { STRICT } from '../helpers/constants';
+import { STRICT } from '../helpers/constants.js';
 
 import Symbol from 'core-js-pure/actual/symbol';
 import DisposableStack from 'core-js-pure/actual/disposable-stack';
@@ -9,10 +9,12 @@ QUnit.test('DisposableStack constructor', assert => {
   assert.arity(DisposableStack, 0);
   assert.name(DisposableStack, 'DisposableStack');
 
-  assert.throws(() => DisposableStack(), 'throws w/o `new`');
   assert.true(new DisposableStack() instanceof DisposableStack);
 
   assert.same(DisposableStack.prototype.constructor, DisposableStack);
+
+  // eslint-disable-next-line sonarjs/inconsistent-function-call -- required for testing
+  assert.throws(() => DisposableStack(), 'throws w/o `new`');
 });
 
 QUnit.test('DisposableStack#dispose', assert => {
@@ -97,12 +99,6 @@ QUnit.test('DisposableStack#move', assert => {
 
   const stack2 = stack1.move();
 
-  assert.false(stack1.disposed);
-
-  stack1.dispose();
-
-  assert.same(result, '');
-
   assert.true(stack1.disposed);
 
   stack2.dispose();
@@ -140,7 +136,7 @@ QUnit.test('DisposableStack', assert => {
   let error2;
 
   stack2.use({ [Symbol.dispose]: () => result2 += '6' });
-  stack2.adopt({}, () => { throw Error(5); });
+  stack2.adopt({}, () => { throw new Error(5); });
   stack2.defer(() => result2 += '4');
   stack2.use({ [Symbol.dispose]: () => result2 += '3' });
   stack2.adopt({}, () => result2 += '2');
@@ -161,9 +157,9 @@ QUnit.test('DisposableStack', assert => {
   let error3;
 
   stack3.use({ [Symbol.dispose]: () => result3 += '6' });
-  stack3.adopt({}, () => { throw Error(5); });
+  stack3.adopt({}, () => { throw new Error(5); });
   stack3.defer(() => result3 += '4');
-  stack3.use({ [Symbol.dispose]: () => { throw Error(3); } });
+  stack3.use({ [Symbol.dispose]: () => { throw new Error(3); } });
   stack3.adopt({}, () => result3 += '2');
   stack3.defer(() => result3 += '1');
 

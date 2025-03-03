@@ -1,4 +1,5 @@
-import { createIterator } from '../helpers/helpers';
+import { STRICT } from '../helpers/constants.js';
+import { createIterator } from '../helpers/helpers.js';
 
 import AsyncIterator from 'core-js-pure/actual/async-iterator';
 
@@ -9,10 +10,10 @@ QUnit.test('AsyncIterator#toArray', assert => {
   assert.arity(toArray, 0);
   assert.nonEnumerable(AsyncIterator.prototype, 'toArray');
 
-  assert.throws(() => toArray.call(undefined), TypeError);
-  assert.throws(() => toArray.call(null), TypeError);
-  assert.throws(() => toArray.call({}), TypeError);
-  assert.throws(() => toArray.call([]), TypeError);
+  if (STRICT) {
+    assert.throws(() => toArray.call(undefined), TypeError);
+    assert.throws(() => toArray.call(null), TypeError);
+  }
 
   return toArray.call(createIterator([1, 2, 3])).then(it => {
     assert.arrayEqual(it, [1, 2, 3]);

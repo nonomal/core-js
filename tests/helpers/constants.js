@@ -14,7 +14,9 @@ export const GLOBAL = Function('return this')();
 
 export const NATIVE = GLOBAL.NATIVE || false;
 
-export const NODE = Object.prototype.toString.call(GLOBAL.process).slice(8, -1) === 'process';
+export const NODE = typeof Bun == 'undefined' && Object.prototype.toString.call(GLOBAL.process).slice(8, -1) === 'process';
+
+export const BUN = typeof Bun != 'undefined' && Object.prototype.toString.call(GLOBAL.process).slice(8, -1) === 'process';
 
 const $TYPED_ARRAYS = {
   Float32Array: 4,
@@ -37,7 +39,7 @@ for (const name in $TYPED_ARRAYS) TYPED_ARRAYS.push({
   $: Number,
 });
 
-export const TYPED_ARRAYS_WITH_BIG_INT = TYPED_ARRAYS.slice();
+export const TYPED_ARRAYS_WITH_BIG_INT = [...TYPED_ARRAYS];
 
 for (const name of ['BigInt64Array', 'BigUint64Array']) if (GLOBAL[name]) TYPED_ARRAYS_WITH_BIG_INT.push({
   name,
@@ -63,15 +65,13 @@ try {
   // Chrome 27- bug, also a bug for native `JSON.parse`
   defineProperty({}, '__proto__', { value: 42, writable: true, configurable: true, enumerable: true });
   REDEFINABLE_PROTO = true;
-} catch (error) { /* empty */ }
-
-export const STRICT = !function () {
-  return this;
-}();
+} catch { /* empty */ }
 
 export const STRICT_THIS = (function () {
   return this;
 })();
+
+export const STRICT = !STRICT_THIS;
 
 export const FREEZING = !function () {
   try {

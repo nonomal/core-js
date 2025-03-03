@@ -1,4 +1,4 @@
-import { STRICT } from '../helpers/constants';
+import { STRICT } from '../helpers/constants.js';
 
 QUnit.test('AsyncDisposableStack constructor', assert => {
   assert.isFunction(AsyncDisposableStack);
@@ -106,15 +106,9 @@ QUnit.test('AsyncDisposableStack#move', assert => {
 
   const stack2 = stack1.move();
 
-  assert.false(stack1.disposed);
+  assert.true(stack1.disposed);
 
-  return stack1.disposeAsync().then(() => {
-    assert.same(result, '');
-
-    assert.true(stack1.disposed);
-
-    return stack2.disposeAsync();
-  }).then(() => {
+  return stack2.disposeAsync().then(() => {
     assert.same(result, '12');
   });
 });
@@ -155,7 +149,7 @@ QUnit.test('AsyncDisposableStack#2', assert => {
   const stack = new AsyncDisposableStack();
 
   stack.use({ [Symbol.asyncDispose]: () => result += '6' });
-  stack.adopt({}, () => { throw Error(5); });
+  stack.adopt({}, () => { throw new Error(5); });
   stack.defer(() => result += '4');
   stack.use({ [Symbol.asyncDispose]: () => Promise.resolve(result += '3') });
   stack.adopt({}, () => Promise.resolve(result += '2'));
@@ -175,9 +169,9 @@ QUnit.test('AsyncDisposableStack#3', assert => {
   const stack = new AsyncDisposableStack();
 
   stack.use({ [Symbol.asyncDispose]: () => result += '6' });
-  stack.adopt({}, () => { throw Error(5); });
+  stack.adopt({}, () => { throw new Error(5); });
   stack.defer(() => result += '4');
-  stack.use({ [Symbol.asyncDispose]: () => Promise.reject(Error(3)) });
+  stack.use({ [Symbol.asyncDispose]: () => Promise.reject(new Error(3)) });
   stack.adopt({}, () => Promise.resolve(result += '2'));
   stack.defer(() => Promise.resolve(result += '1'));
 
@@ -189,4 +183,20 @@ QUnit.test('AsyncDisposableStack#3', assert => {
     assert.same(error.error.message, '5');
     assert.same(error.suppressed.message, '3');
   });
+});
+
+// https://github.com/tc39/proposal-explicit-resource-management/issues/256
+QUnit.test('AsyncDisposableStack#256', assert => {
+  const resume = assert.async();
+  assert.expect(1);
+  let called = false;
+  const stack = new AsyncDisposableStack();
+  const neverResolves = new Promise(() => { /* empty */ });
+  stack.use({ [Symbol.dispose]() { return neverResolves; } });
+  stack.disposeAsync().then(() => {
+    called = true;
+    assert.required('It should be called');
+    resume();
+  });
+  setTimeout(() => called || resume(), 3e3);
 });

@@ -1,4 +1,4 @@
-import { WHITESPACES } from '../helpers/constants';
+import { WHITESPACES } from '../helpers/constants.js';
 
 QUnit.test('parseFloat', assert => {
   assert.isFunction(parseFloat);
@@ -17,7 +17,8 @@ QUnit.test('parseFloat', assert => {
   assert.same(parseFloat(undefined), NaN);
 
   if (typeof Symbol == 'function' && !Symbol.sham) {
-    assert.throws(() => parseFloat(Symbol()), 'throws on symbol argument');
-    assert.throws(() => parseFloat(Object(Symbol())), 'throws on boxed symbol argument');
+    const symbol = Symbol('parseFloat test');
+    assert.throws(() => parseFloat(symbol), 'throws on symbol argument');
+    assert.throws(() => parseFloat(Object(symbol)), 'throws on boxed symbol argument');
   }
 });

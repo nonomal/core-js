@@ -1,4 +1,4 @@
-import { STRICT } from '../helpers/constants';
+import { STRICT } from '../helpers/constants.js';
 
 QUnit.test('DisposableStack constructor', assert => {
   assert.isFunction(DisposableStack);
@@ -99,12 +99,6 @@ QUnit.test('DisposableStack#move', assert => {
 
   const stack2 = stack.move();
 
-  assert.false(stack.disposed);
-
-  stack.dispose();
-
-  assert.same(result, '');
-
   assert.true(stack.disposed);
 
   stack2.dispose();
@@ -142,7 +136,7 @@ QUnit.test('DisposableStack', assert => {
   let error2;
 
   stack2.use({ [Symbol.dispose]: () => result2 += '6' });
-  stack2.adopt({}, () => { throw Error(5); });
+  stack2.adopt({}, () => { throw new Error(5); });
   stack2.defer(() => result2 += '4');
   stack2.use({ [Symbol.dispose]: () => result2 += '3' });
   stack2.adopt({}, () => result2 += '2');
@@ -163,9 +157,9 @@ QUnit.test('DisposableStack', assert => {
   let error3;
 
   stack3.use({ [Symbol.dispose]: () => result3 += '6' });
-  stack3.adopt({}, () => { throw Error(5); });
+  stack3.adopt({}, () => { throw new Error(5); });
   stack3.defer(() => result3 += '4');
-  stack3.use({ [Symbol.dispose]: () => { throw Error(3); } });
+  stack3.use({ [Symbol.dispose]: () => { throw new Error(3); } });
   stack3.adopt({}, () => result3 += '2');
   stack3.defer(() => result3 += '1');
 

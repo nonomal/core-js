@@ -1,4 +1,4 @@
-import { DESCRIPTORS, GLOBAL, NATIVE, PROTO, STRICT } from '../helpers/constants';
+import { DESCRIPTORS, GLOBAL, NATIVE, PROTO, STRICT } from '../helpers/constants.js';
 
 const Symbol = GLOBAL.Symbol || {};
 const { setPrototypeOf, create } = Object;
@@ -31,7 +31,7 @@ if (DESCRIPTORS) QUnit.test('Promise operations order', assert => {
     // eslint-disable-next-line unicorn/no-thenable -- required for testing
     then() {
       result += 'A';
-      throw Error();
+      throw new Error();
     },
   });
   promise1.catch(() => {
@@ -49,7 +49,7 @@ if (DESCRIPTORS) QUnit.test('Promise operations order', assert => {
   $resolve2(Object.defineProperty({}, 'then', {
     get() {
       result += 'D';
-      throw Error();
+      throw new Error();
     },
   }));
   result += 'E';
@@ -77,7 +77,7 @@ QUnit.test('Promise#then', assert => {
   let promise = new Promise(resolve => {
     resolve(42);
   });
-  let FakePromise1 = promise.constructor = function (executor) {
+  const FakePromise1 = promise.constructor = function (executor) {
     executor(() => { /* empty */ }, () => { /* empty */ });
   };
   const FakePromise2 = FakePromise1[Symbol.species] = function (executor) {
@@ -87,27 +87,27 @@ QUnit.test('Promise#then', assert => {
   promise = new Promise(resolve => {
     resolve(42);
   });
-  promise.constructor = FakePromise1 = function (executor) {
+  promise.constructor = function (executor) {
     executor(() => { /* empty */ }, () => { /* empty */ });
   };
   assert.true(promise.then(() => { /* empty */ }) instanceof Promise, 'subclassing, incorrect `this` pattern');
   promise = new Promise(resolve => {
     resolve(42);
   });
-  promise.constructor = FakePromise1 = function (executor) {
+  const FakePromise3 = promise.constructor = function (executor) {
     executor(() => { /* empty */ }, () => { /* empty */ });
   };
-  FakePromise1[Symbol.species] = function () { /* empty */ };
+  FakePromise3[Symbol.species] = function () { /* empty */ };
   assert.throws(() => {
     promise.then(() => { /* empty */ });
   }, 'NewPromiseCapability validations, #1');
-  FakePromise1[Symbol.species] = function (executor) {
+  FakePromise3[Symbol.species] = function (executor) {
     executor(null, () => { /* empty */ });
   };
   assert.throws(() => {
     promise.then(() => { /* empty */ });
   }, 'NewPromiseCapability validations, #2');
-  FakePromise1[Symbol.species] = function (executor) {
+  FakePromise3[Symbol.species] = function (executor) {
     executor(() => { /* empty */ }, null);
   };
   assert.throws(() => {
@@ -124,6 +124,7 @@ if (PROTO) QUnit.test('Promise subclassing', assert => {
   function SubPromise(executor) {
     const self = new Promise(executor);
     setPrototypeOf(self, SubPromise.prototype);
+    // eslint-disable-next-line es/no-nonstandard-promise-prototype-properties -- safe
     self.mine = 'subclass';
     return self;
   }
@@ -225,7 +226,7 @@ const promise = (() => {
   } catch { /* empty */ }
 })();
 
-if (promise && promise.constructor !== Promise) QUnit.test('Native Promise, patched', assert => {
+if (promise) QUnit.test('Native Promise, maybe patched', assert => {
   assert.isFunction(promise.then);
   assert.arity(promise.then, 2);
   assert.looksNative(promise.then);

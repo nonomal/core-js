@@ -1,4 +1,5 @@
-import { GLOBAL, WHITESPACES } from '../helpers/constants';
+/* eslint-disable prefer-numeric-literals -- required for testing */
+import { GLOBAL, WHITESPACES } from '../helpers/constants.js';
 
 QUnit.test('Number.parseInt', assert => {
   const { parseInt } = Number;
@@ -37,7 +38,8 @@ QUnit.test('Number.parseInt', assert => {
   assert.same(parseInt(undefined), NaN);
 
   if (typeof Symbol == 'function' && !Symbol.sham) {
-    assert.throws(() => parseInt(Symbol()), 'throws on symbol argument');
-    assert.throws(() => parseInt(Object(Symbol())), 'throws on boxed symbol argument');
+    const symbol = Symbol('Number.parseInt test');
+    assert.throws(() => parseInt(symbol), 'throws on symbol argument');
+    assert.throws(() => parseInt(Object(symbol)), 'throws on boxed symbol argument');
   }
 });

@@ -1,5 +1,6 @@
-import { GLOBAL, STRICT } from '../helpers/constants';
-import { patchRegExp$exec } from '../helpers/helpers';
+/* eslint-disable prefer-regex-literals -- required for testing */
+import { GLOBAL, STRICT } from '../helpers/constants.js';
+import { patchRegExp$exec } from '../helpers/helpers.js';
 
 const Symbol = GLOBAL.Symbol || {};
 
@@ -72,7 +73,7 @@ const run = assert => {
   string = Object('power \u006F\u0066 the power of the power \u006F\u0066 the power of the power \u006F\u0066 the power of the great sword');
   assert.same(string.search(/of/), string.search(/of/g), 'S15.5.4.12_A3_T2');
 
-  assert.throws(() => ''.search.call(Symbol(), /./), 'throws on symbol context');
+  assert.throws(() => ''.search.call(Symbol('search test'), /./), 'throws on symbol context');
 };
 
 QUnit.test('String#search regression', run);
@@ -112,9 +113,9 @@ QUnit.test('RegExp#@@search delegates to exec', assert => {
   let execCalled = false;
   let re = /b/;
   re.lastIndex = 7;
-  re.exec = function () {
+  re.exec = function (...args) {
     execCalled = true;
-    return /./.exec.apply(this, arguments);
+    return /./.exec.apply(this, args);
   };
   assert.deepEqual(re[Symbol.search]('abc'), 1);
   assert.true(execCalled);

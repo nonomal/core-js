@@ -1,4 +1,4 @@
-import { STRICT, WHITESPACES } from '../helpers/constants';
+import { STRICT, WHITESPACES } from '../helpers/constants.js';
 
 QUnit.test('String#trim', assert => {
   const { trim } = String.prototype;
@@ -12,7 +12,7 @@ QUnit.test('String#trim', assert => {
   assert.same('\u200B\u0085'.trim(), '\u200B\u0085', "shouldn't remove this symbols");
 
   if (typeof Symbol == 'function' && !Symbol.sham) {
-    assert.throws(() => trim.call(Symbol()), 'throws on symbol context');
+    assert.throws(() => trim.call(Symbol('trim test')), 'throws on symbol context');
   }
 
   if (STRICT) {

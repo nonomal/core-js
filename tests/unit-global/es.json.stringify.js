@@ -1,7 +1,7 @@
 // Some tests adopted from Test262 project and governed by the BSD license.
 // Copyright (c) 2012 Ecma International. All rights reserved.
 /* eslint-disable es/no-bigint,unicorn/no-hex-escape -- testing */
-import { DESCRIPTORS, GLOBAL } from '../helpers/constants';
+import { DESCRIPTORS, GLOBAL } from '../helpers/constants.js';
 
 if (GLOBAL.JSON?.stringify) {
   QUnit.test('JSON.stringify', assert => {
@@ -19,7 +19,7 @@ if (GLOBAL.JSON?.stringify) {
 
     const num1 = new Number(10);
     num1.toString = () => 'toString';
-    num1.valueOf = () => { throw EvalError('should not be called'); };
+    num1.valueOf = () => { throw new EvalError('should not be called'); };
     assert.same(stringify({
       10: 1,
       toString: 2,
@@ -45,7 +45,7 @@ if (GLOBAL.JSON?.stringify) {
 
     const str1 = new String('str');
     str1.toString = () => 'toString';
-    str1.valueOf = () => { throw EvalError('should not be called'); };
+    str1.valueOf = () => { throw new EvalError('should not be called'); };
     assert.same(stringify({
       str: 1,
       toString: 2,
@@ -59,7 +59,7 @@ if (GLOBAL.JSON?.stringify) {
     sparse[1] = 'key';
     assert.same(stringify({ undefined: 1, key: 2 }, sparse), '{"key":2}', 'replacer-array-undefined-3');
 
-    assert.throws(() => stringify({}, () => { throw EvalError('should not be called'); }), EvalError, 'replacer-function-abrupt');
+    assert.throws(() => stringify({}, () => { throw new EvalError('should not be called'); }), EvalError, 'replacer-function-abrupt');
 
     const calls = [];
     const b1 = [1, 2];
@@ -111,7 +111,7 @@ if (GLOBAL.JSON?.stringify) {
         case '1': return 2;
         case 'c1': return true;
         case 'c2': return false;
-      } throw EvalError('unreachable');
+      } throw new EvalError('unreachable');
     }), stringify({
       a1: {
         b1: [1, 2],
@@ -142,7 +142,7 @@ if (GLOBAL.JSON?.stringify) {
     assert.same(stringify(obj4, null), json1, 'replacer-wrong-type-4');
     assert.same(stringify(obj4, ''), json1, 'replacer-wrong-type-5');
     assert.same(stringify(obj4, 0), json1, 'replacer-wrong-type-6');
-    assert.same(stringify(obj4, Symbol()), json1, 'replacer-wrong-type-7');
+    assert.same(stringify(obj4, Symbol('stringify replacer test')), json1, 'replacer-wrong-type-7');
     assert.same(stringify(obj4, true), json1, 'replacer-wrong-type-8');
 
     const obj5 = {
@@ -162,12 +162,12 @@ if (GLOBAL.JSON?.stringify) {
 
     assert.same(stringify(obj5, null, new Number(1)), stringify(obj5, null, 1), 'space-number-object-1');
     const num2 = new Number(1);
-    num2.toString = () => { throw EvalError('should not be called'); };
+    num2.toString = () => { throw new EvalError('should not be called'); };
     num2.valueOf = () => 3;
     assert.same(stringify(obj5, null, num2), stringify(obj5, null, 3), 'space-number-object-2');
     const abrupt1 = new Number(4);
-    abrupt1.toString = () => { throw EvalError('t262'); };
-    abrupt1.valueOf = () => { throw EvalError('t262'); };
+    abrupt1.toString = () => { throw new EvalError('t262'); };
+    abrupt1.valueOf = () => { throw new EvalError('t262'); };
     assert.throws(() => stringify(obj5, null, abrupt1), EvalError, 'space-number-object-3');
 
     assert.same(stringify(obj5, null, new Number(-5)), stringify(obj5, null, 0), 'space-number-range-1');
@@ -179,11 +179,11 @@ if (GLOBAL.JSON?.stringify) {
     assert.same(stringify(obj5, null, new String('xxx')), stringify(obj5, null, 'xxx'), 'space-string-object-1');
     const str2 = new String('xxx');
     str2.toString = () => '---';
-    str2.valueOf = () => { throw EvalError('should not be called'); };
+    str2.valueOf = () => { throw new EvalError('should not be called'); };
     assert.same(stringify(obj5, null, str2), stringify(obj5, null, '---'), 'space-string-object-2');
     const abrupt2 = new String('xxx');
-    abrupt2.toString = () => { throw EvalError('t262'); };
-    abrupt2.valueOf = () => { throw EvalError('t262'); };
+    abrupt2.toString = () => { throw new EvalError('t262'); };
+    abrupt2.valueOf = () => { throw new EvalError('t262'); };
     assert.throws(() => stringify(obj5, null, abrupt2), EvalError, 'space-string-object-3');
 
     assert.same(stringify(obj5, null, '0123456789xxxxxxxxx'), stringify(obj5, null, '0123456789'), 'space-string-range');
@@ -208,7 +208,7 @@ if (GLOBAL.JSON?.stringify) {
     assert.same(stringify(obj5), stringify(obj5, null, null), 'space-wrong-type-1');
     assert.same(stringify(obj5), stringify(obj5, null, true), 'space-wrong-type-2');
     assert.same(stringify(obj5), stringify(obj5, null, new Boolean(false)), 'space-wrong-type-3');
-    assert.same(stringify(obj5), stringify(obj5, null, Symbol()), 'space-wrong-type-4');
+    assert.same(stringify(obj5), stringify(obj5, null, Symbol('stringify space test')), 'space-wrong-type-4');
     assert.same(stringify(obj5), stringify(obj5, null, {}), 'space-wrong-type-5');
 
     const direct2 = [];
@@ -250,7 +250,7 @@ if (GLOBAL.JSON?.stringify) {
     assert.same(stringify(['str'], (key, value) => {
       if (value === 'str') {
         const num = new Number(42);
-        num.toString = () => { throw EvalError('should not be called'); };
+        num.toString = () => { throw new EvalError('should not be called'); };
         num.valueOf = () => 2;
         return num;
       } return value;
@@ -259,8 +259,8 @@ if (GLOBAL.JSON?.stringify) {
       key: {
         toJSON() {
           const num = new Number(3.14);
-          num.toString = () => { throw EvalError('t262'); };
-          num.valueOf = () => { throw EvalError('t262'); };
+          num.toString = () => { throw new EvalError('t262'); };
+          num.valueOf = () => { throw new EvalError('t262'); };
           return num;
         },
       },
@@ -350,7 +350,7 @@ if (GLOBAL.JSON?.stringify) {
         toJSON() {
           const str = new String('str');
           str.toString = () => 'toString';
-          str.valueOf = () => { throw EvalError('should not be called'); };
+          str.valueOf = () => { throw new EvalError('should not be called'); };
           return str;
         },
       },
@@ -358,41 +358,42 @@ if (GLOBAL.JSON?.stringify) {
     assert.throws(() => stringify([true], (key, value) => {
       if (value === true) {
         const str = new String('str');
-        str.toString = () => { throw EvalError('t262'); };
-        str.valueOf = () => { throw EvalError('t262'); };
+        str.toString = () => { throw new EvalError('t262'); };
+        str.valueOf = () => { throw new EvalError('t262'); };
         return str;
       } return value;
     }), 'value-string-object-3');
 
     assert.throws(() => stringify({
-      toJSON() { throw EvalError('t262'); },
+      toJSON() { throw new EvalError('t262'); },
     }), EvalError, 'value-tojson-abrupt-1');
 
     let callCount = 0;
-    let _this, _key;
+    let $this, $key;
     const obj6 = {
       toJSON(key) {
         callCount += 1;
-        _this = this;
-        _key = key;
+        $this = this;
+        $key = key;
       },
     };
     assert.same(stringify(obj6), undefined, 'value-tojson-arguments-1');
     assert.same(callCount, 1, 'value-tojson-arguments-2');
-    assert.same(_this, obj6, 'value-tojson-arguments-3');
-    assert.same(_key, '', 'value-tojson-arguments-4');
+    assert.same($this, obj6, 'value-tojson-arguments-3');
+    assert.same($key, '', 'value-tojson-arguments-4');
     assert.same(stringify([1, obj6, 3]), '[1,null,3]', 'value-tojson-arguments-5');
     assert.same(callCount, 2, 'value-tojson-arguments-6');
-    assert.same(_this, obj6, 'value-tojson-arguments-7');
+    assert.same($this, obj6, 'value-tojson-arguments-7');
     // some old implementations (like WebKit) could pass numbers as keys
-    // assert.same(_key, '1', 'value-tojson-arguments-8');
+    // assert.same($key, '1', 'value-tojson-arguments-8');
     assert.same(stringify({ key: obj6 }), '{}', 'value-tojson-arguments-9');
     assert.same(callCount, 3, 'value-tojson-arguments-10');
-    assert.same(_this, obj6, 'value-tojson-arguments-11');
-    assert.same(_key, 'key', 'value-tojson-arguments-12');
+    assert.same($this, obj6, 'value-tojson-arguments-11');
+    assert.same($key, 'key', 'value-tojson-arguments-12');
 
     const arr1 = [];
     const circular2 = [arr1];
+    // eslint-disable-next-line es/no-nonstandard-array-prototype-properties -- testing
     arr1.toJSON = () => circular2;
     assert.throws(() => stringify(circular2), TypeError, 'value-tojson-array-circular');
 
@@ -408,12 +409,15 @@ if (GLOBAL.JSON?.stringify) {
 
     assert.same(stringify({ toJSON() { return [false]; } }), '[false]', 'value-tojson-result-1');
     const arr2 = [true];
+    // eslint-disable-next-line es/no-nonstandard-array-prototype-properties -- testing
     arr2.toJSON = () => { /* empty */ };
     assert.same(stringify(arr2), undefined, 'value-tojson-result-2');
     const str3 = new String('str');
+    // eslint-disable-next-line es/no-nonstandard-string-prototype-properties -- testing
     str3.toJSON = () => null;
     assert.same(stringify({ key: str3 }), '{"key":null}', 'value-tojson-result-3');
     const num3 = new Number(14);
+    // eslint-disable-next-line es/no-nonstandard-number-prototype-properties -- testing
     num3.toJSON = () => ({ key: 7 });
     assert.same(stringify([num3]), '[{"key":7}]', 'value-tojson-result-4');
 
@@ -486,24 +490,27 @@ if (GLOBAL.JSON?.stringify) {
   QUnit.test('Symbols & JSON.stringify', assert => {
     const { stringify } = JSON;
 
+    const symbol1 = Symbol('symbol & stringify test 1');
+    const symbol2 = Symbol('symbol & stringify test 2');
+
     assert.same(stringify([
       1,
-      Symbol('foo'),
+      symbol1,
       false,
-      Symbol('bar'),
+      symbol2,
       {},
     ]), '[1,null,false,null,{}]', 'array value');
     assert.same(stringify({
-      symbol: Symbol('symbol'),
+      symbol: symbol1,
     }), '{}', 'object value');
     if (DESCRIPTORS) {
       const object = { bar: 2 };
-      object[Symbol('symbol')] = 1;
+      object[symbol1] = 1;
       assert.same(stringify(object), '{"bar":2}', 'object key');
     }
-    assert.same(stringify(Symbol('symbol')), undefined, 'symbol value');
-    if (typeof Symbol() == 'symbol') {
-      assert.same(stringify(Object(Symbol('symbol'))), '{}', 'boxed symbol');
+    assert.same(stringify(symbol1), undefined, 'symbol value');
+    if (typeof symbol1 == 'symbol') {
+      assert.same(stringify(Object(symbol1)), '{}', 'boxed symbol');
     }
     assert.same(stringify(undefined, () => 42), '42', 'replacer works with top-level undefined');
   });

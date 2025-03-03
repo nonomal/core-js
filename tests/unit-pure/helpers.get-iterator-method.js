@@ -1,4 +1,4 @@
-import { createIterable } from '../helpers/helpers';
+import { createIterable } from '../helpers/helpers.js';
 
 import getIteratorMethod from 'core-js-pure/full/get-iterator-method';
 
@@ -10,6 +10,7 @@ QUnit.test('getIteratorMethod helper', assert => {
   assert.isIterator(iterFn.call(iterable));
   assert.isFunction(getIteratorMethod([]));
   assert.isFunction(getIteratorMethod(function () {
+    // eslint-disable-next-line prefer-rest-params -- required for testing
     return arguments;
   }()));
   assert.isFunction(getIteratorMethod(Array.prototype));

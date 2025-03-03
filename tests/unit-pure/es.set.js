@@ -1,7 +1,7 @@
 /* eslint-disable sonarjs/no-element-overwrite -- required for testing */
 
-import { createIterable, is, nativeSubclass } from '../helpers/helpers';
-import { DESCRIPTORS } from '../helpers/constants';
+import { createIterable, is, nativeSubclass } from '../helpers/helpers.js';
+import { DESCRIPTORS } from '../helpers/constants.js';
 
 import getIterator from 'core-js-pure/es/get-iterator';
 import getIteratorMethod from 'core-js-pure/es/get-iterator-method';
@@ -56,6 +56,7 @@ QUnit.test('Set', assert => {
   assert.true(done, '.return #throw');
   const array = [];
   done = false;
+  // eslint-disable-next-line es/no-nonstandard-array-prototype-properties -- legacy FF case
   array['@@iterator'] = undefined;
   array[Symbol.iterator] = function () {
     done = true;

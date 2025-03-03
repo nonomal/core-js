@@ -1,4 +1,4 @@
-import { fromSource } from '../helpers/helpers';
+import { fromSource } from '../helpers/helpers.js';
 
 QUnit.test('Function.isCallable', assert => {
   const { isCallable } = Function;
@@ -9,6 +9,7 @@ QUnit.test('Function.isCallable', assert => {
   assert.nonEnumerable(Function, 'isCallable');
   assert.false(isCallable({}), 'object');
   assert.false(isCallable(function () {
+    // eslint-disable-next-line prefer-rest-params -- required for testing
     return arguments;
   }()), 'arguments');
   assert.false(isCallable([]), 'array');

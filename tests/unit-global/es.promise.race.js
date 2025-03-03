@@ -1,4 +1,4 @@
-import { createIterable } from '../helpers/helpers';
+import { createIterable } from '../helpers/helpers.js';
 
 QUnit.test('Promise.race', assert => {
   let FakePromise1, FakePromise2;
@@ -14,6 +14,7 @@ QUnit.test('Promise.race', assert => {
   assert.true(iterable.called, 'works with iterables: next called');
   const array = [];
   let done = false;
+  // eslint-disable-next-line es/no-nonstandard-array-prototype-properties -- legacy FF case
   array['@@iterator'] = undefined;
   array[Symbol.iterator] = function () {
     done = true;
@@ -34,7 +35,7 @@ QUnit.test('Promise.race', assert => {
         done = true;
       },
     })).catch(() => { /* empty */ });
-  } catch (error) { /* empty */ }
+  } catch { /* empty */ }
   Promise.resolve = resolve;
   assert.true(done, 'iteration closing');
   FakePromise1 = function (executor) {

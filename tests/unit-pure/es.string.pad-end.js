@@ -1,4 +1,4 @@
-import { STRICT } from '../helpers/constants';
+import { STRICT } from '../helpers/constants.js';
 
 import Symbol from 'core-js-pure/es/symbol';
 import padEnd from 'core-js-pure/es/string/pad-end';
@@ -13,8 +13,9 @@ QUnit.test('String#padEnd', assert => {
   assert.same(padEnd('foo', 1), 'foo');
   assert.same(padEnd('foo', 5, ''), 'foo');
 
-  assert.throws(() => padEnd(Symbol(), 10, 'a'), 'throws on symbol context');
-  assert.throws(() => padEnd('a', 10, Symbol()), 'throws on symbol argument');
+  const symbol = Symbol('padEnd test');
+  assert.throws(() => padEnd(symbol, 10, 'a'), 'throws on symbol context');
+  assert.throws(() => padEnd('a', 10, symbol), 'throws on symbol argument');
 
   if (STRICT) {
     assert.throws(() => padEnd(null, 0), TypeError);

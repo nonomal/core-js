@@ -1,4 +1,5 @@
-import { DESCRIPTORS } from '../helpers/constants';
+/* eslint-disable prefer-regex-literals -- required for testing */
+import { DESCRIPTORS } from '../helpers/constants.js';
 
 if (DESCRIPTORS) {
   QUnit.test('RegExp#sticky', assert => {
@@ -19,13 +20,13 @@ if (DESCRIPTORS) {
       try {
         stickyGetter.call(/a/);
         assert.required('.sticky getter works on literals');
-      } catch (error) {
+      } catch {
         assert.avoid('.sticky getter works on literals');
       }
       try {
         stickyGetter.call(new RegExp('a'));
         assert.required('.sticky getter works on instances');
-      } catch (error) {
+      } catch {
         assert.avoid('.sticky getter works on instances');
       }
 

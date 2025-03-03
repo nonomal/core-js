@@ -1,4 +1,4 @@
-import { STRICT } from '../helpers/constants';
+import { STRICT } from '../helpers/constants.js';
 
 import Symbol from 'core-js-pure/es/symbol';
 import endsWith from 'core-js-pure/es/string/ends-with';
@@ -20,8 +20,9 @@ QUnit.test('String#endsWith', assert => {
   assert.false(endsWith('abc', 'a', 'x'));
 
   if (!Symbol.sham) {
-    assert.throws(() => endsWith(Symbol(), 'b'), 'throws on symbol context');
-    assert.throws(() => endsWith('a', Symbol()), 'throws on symbol argument');
+    const symbol = Symbol('endsWith test');
+    assert.throws(() => endsWith(symbol, 'b'), 'throws on symbol context');
+    assert.throws(() => endsWith('a', symbol), 'throws on symbol argument');
   }
 
   if (STRICT) {

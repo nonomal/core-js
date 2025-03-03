@@ -9,41 +9,61 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 19
+          node-version: 23
           cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.13
       - run: npm ci
-      - run: npm run lint
+      - run: pip install codespell
+      - run: npx run-s lint-raw codespell
 
   karma:
-    runs-on: ubuntu-latest
+    runs-on: windows-2019
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 19
+          node-version: 23
           cache: npm
       - run: npm ci
-      - run: npx run-s init bundle test-unit-karma
+      - run: npx run-s bundle test-unit-karma
+
+  bun:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 23
+          cache: npm
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: npm ci
+      - run: npx run-s bundle test-unit-bun
 
   promises-and-observables:
     strategy:
       matrix:
         node:
-          - 16.13
           - 18.12
-          - 19
+          - 20.9
+          - 21
+          - ^22.5.1
+          - 23
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
-      - run: npx run-s init test-promises test-observables
+      - run: npx run-s test-promises test-observables
 
   tests:
     strategy:
@@ -53,15 +73,17 @@ jobs:
           - windows-latest
           - macos-latest
         node:
-          - 16.13
           - 18.12
-          - 19
+          - 20.9
+          - 21
+          - ^22.5.1
+          - 23
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
-      - run: npx run-s init bundle test-unit-node test-entries test-compat-data test-compat-tools test-builder
+      - run: npx run-s bundle test-unit-node test-entries test-compat-data test-compat-tools test-builder

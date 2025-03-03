@@ -1,7 +1,8 @@
+/* eslint-disable prefer-regex-literals -- required for testing */
 /* eslint-disable regexp/no-empty-group, regexp/no-empty-capturing-group -- required for testing */
 /* eslint-disable regexp/optimal-lookaround-quantifier, regexp/no-lazy-ends -- required for testing */
-import { GLOBAL, NATIVE, STRICT } from '../helpers/constants';
-import { patchRegExp$exec } from '../helpers/helpers';
+import { GLOBAL, NATIVE, STRICT } from '../helpers/constants.js';
+import { patchRegExp$exec } from '../helpers/helpers.js';
 
 const Symbol = GLOBAL.Symbol || {};
 
@@ -236,7 +237,7 @@ const run = assert => {
     }
   }
   try {
-    String.prototype.split.call(6776767677.006771122677555, {
+    String.prototype.split.call(6776767677.006771, {
       toString() {
         return /77/g;
       },
@@ -245,7 +246,7 @@ const run = assert => {
   } catch (error) {
     assert.true(error instanceof TypeError, 'S15.5.4.14_A1_T16 #2');
   }
-  split = String.prototype.split.call(6776767677.006771122677555, /77/g);
+  split = String.prototype.split.call(6776767677.006771, /77/g);
   assert.same(typeof split, 'object', 'S15.5.4.14_A1_T17 #1');
   assert.same(split.constructor, Array, 'S15.5.4.14_A1_T17 #2');
   assert.same(split.length, 4, 'S15.5.4.14_A1_T17 #3');
@@ -253,7 +254,7 @@ const run = assert => {
   assert.same(split[1], '67676', 'S15.5.4.14_A1_T17 #5');
   assert.same(split[2], '.006', 'S15.5.4.14_A1_T17 #6');
   assert.same(split[3], '1', 'S15.5.4.14_A1_T17 #7');
-  split = String.prototype.split.call(6776767677.006771122677555, /00/, 1);
+  split = String.prototype.split.call(6776767677.006771, /00/, 1);
   assert.same(typeof split, 'object', 'S15.5.4.14_A1_T18 #1');
   assert.same(split.constructor, Array, 'S15.5.4.14_A1_T18 #2');
   assert.same(split.length, 1, 'S15.5.4.14_A1_T18 #3');
@@ -414,7 +415,7 @@ const run = assert => {
   assert.same(split.constructor, Array, 'S15.5.4.14_A2_T28 #1');
   assert.same(split.length, 1, 'S15.5.4.14_A2_T28 #2');
   assert.same(split[0], 'hello', 'S15.5.4.14_A2_T28 #3');
-  instance = Object(100111122133144155);
+  instance = Object(100111122133144160);
   instance.split = String.prototype.split;
   split = instance.split(1);
   expected = ['', '00', '', '', '', '22', '33', '44', '60'];
@@ -423,7 +424,7 @@ const run = assert => {
   for (let i = 0, { length } = expected; i < length; ++i) {
     assert.same(expected[i], split[i], `S15.5.4.14_A2_T29 #${ i + 3 }`);
   }
-  instance = Object(100111122133144155);
+  instance = Object(100111122133144160);
   instance.split = String.prototype.split;
   split = instance.split(1, 1);
   expected = [''];
@@ -432,7 +433,7 @@ const run = assert => {
   for (let i = 0, { length } = expected; i < length; ++i) {
     assert.same(expected[i], split[i], `S15.5.4.14_A2_T30 #${ i + 3 }`);
   }
-  instance = Object(100111122133144155);
+  instance = Object(100111122133144160);
   instance.split = String.prototype.split;
   split = instance.split(1, 2);
   expected = ['', '00'];
@@ -441,12 +442,12 @@ const run = assert => {
   for (let i = 0, { length } = expected; i < length; ++i) {
     assert.same(expected[i], split[i], `S15.5.4.14_A2_T31 #${ i + 3 }`);
   }
-  instance = Object(100111122133144155);
+  instance = Object(100111122133144160);
   instance.split = String.prototype.split;
   split = instance.split(1, 0);
   assert.same(split.constructor, Array, 'S15.5.4.14_A2_T32 #1');
   assert.same(split.length, 0, 'S15.5.4.14_A2_T32 #2');
-  instance = Object(100111122133144155);
+  instance = Object(100111122133144160);
   instance.split = String.prototype.split;
   split = instance.split(1, 100);
   expected = ['', '00', '', '', '', '22', '33', '44', '60'];
@@ -455,7 +456,7 @@ const run = assert => {
   for (let i = 0, { length } = expected; i < length; ++i) {
     assert.same(expected[i], split[i], `S15.5.4.14_A2_T33 #${ i + 3 }`);
   }
-  instance = Object(100111122133144155);
+  instance = Object(100111122133144160);
   instance.split = String.prototype.split;
   split = instance.split(1, undefined);
   expected = ['', '00', '', '', '', '22', '33', '44', '60'];
@@ -464,7 +465,7 @@ const run = assert => {
   for (let i = 0, { length } = expected; i < length; ++i) {
     assert.same(expected[i], split[i], `S15.5.4.14_A2_T34 #${ i + 3 }`);
   }
-  instance = Object(100111122133144155);
+  instance = Object(100111122133144160);
   instance.split = String.prototype.split;
   split = instance.split(1, 2 ** 32 - 1);
   expected = ['', '00', '', '', '', '22', '33', '44', '60'];
@@ -473,22 +474,22 @@ const run = assert => {
   for (let i = 0, { length } = expected; i < length; ++i) {
     assert.same(expected[i], split[i], `S15.5.4.14_A2_T35 #${ i + 3 }`);
   }
-  instance = Object(100111122133144155);
+  instance = Object(100111122133144160);
   instance.split = String.prototype.split;
   split = instance.split(1, 'boo');
   assert.same(split.constructor, Array, 'S15.5.4.14_A2_T36 #1');
   assert.same(split.length, 0, 'S15.5.4.14_A2_T36 #2');
-  instance = Object(100111122133144155);
+  instance = Object(100111122133144160);
   instance.split = String.prototype.split;
   split = instance.split(1, -(2 ** 32) + 1);
   assert.same(split.constructor, Array, 'S15.5.4.14_A2_T37 #1');
   assert.arrayEqual(split, [''], 'S15.5.4.14_A2_T37 #2');
-  instance = Object(100111122133144155);
+  instance = Object(100111122133144160);
   instance.split = String.prototype.split;
   split = instance.split(1, NaN);
   assert.same(split.constructor, Array, 'S15.5.4.14_A2_T38 #1');
   assert.same(split.length, 0, 'S15.5.4.14_A2_T38 #2');
-  instance = Object('hello').split('l', 0);
+  split = Object('hello').split('l', 0);
   assert.same(split.constructor, Array, 'S15.5.4.14_A2_T39 #1');
   assert.same(split.length, 0, 'S15.5.4.14_A2_T39 #2');
   split = Object('hello').split('l', 1);
@@ -688,7 +689,7 @@ const run = assert => {
     }
   }
 
-  assert.throws(() => ''.split.call(Symbol(), /./), 'throws on symbol context');
+  assert.throws(() => ''.split.call(Symbol('aplit test'), /./), 'throws on symbol context');
 };
 
 QUnit.test('String#split regression', run);
@@ -735,18 +736,18 @@ QUnit.test('RegExp#@@split delegates to exec', assert => {
   let speciesCalled = false;
   let execSpeciesCalled = false;
   const re = /[24]/;
-  re.exec = function () {
+  re.exec = function (...args) {
     execCalled = true;
-    return /./.exec.apply(this, arguments);
+    return /./.exec.apply(this, args);
   };
   re.constructor = {
     // eslint-disable-next-line object-shorthand -- constructor
     [Symbol.species]: function (source, flags) {
       const re2 = new RegExp(source, flags);
       speciesCalled = true;
-      re2.exec = function () {
+      re2.exec = function (...args) {
         execSpeciesCalled = true;
-        return /./.exec.apply(this, arguments);
+        return /./.exec.apply(this, args);
       };
       return re2;
     },

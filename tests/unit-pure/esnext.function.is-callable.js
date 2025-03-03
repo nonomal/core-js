@@ -1,5 +1,5 @@
 import isCallable from 'core-js-pure/full/function/is-callable';
-import { fromSource } from '../helpers/helpers';
+import { fromSource } from '../helpers/helpers.js';
 
 QUnit.test('Function.isCallable', assert => {
   assert.isFunction(isCallable);
@@ -7,6 +7,7 @@ QUnit.test('Function.isCallable', assert => {
   assert.name(isCallable, 'isCallable');
   assert.false(isCallable({}), 'object');
   assert.false(isCallable(function () {
+    // eslint-disable-next-line prefer-rest-params -- required for testing
     return arguments;
   }()), 'arguments');
   assert.false(isCallable([]), 'array');

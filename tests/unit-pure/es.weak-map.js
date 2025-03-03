@@ -1,5 +1,5 @@
-import { createIterable, nativeSubclass } from '../helpers/helpers';
-import { DESCRIPTORS, FREEZING } from '../helpers/constants';
+import { createIterable, nativeSubclass } from '../helpers/helpers.js';
+import { DESCRIPTORS, FREEZING } from '../helpers/constants.js';
 
 import getIteratorMethod from 'core-js-pure/es/get-iterator-method';
 import freeze from 'core-js-pure/es/object/freeze';
@@ -43,6 +43,7 @@ QUnit.test('WeakMap', assert => {
   assert.false(('clear' in WeakMap.prototype), 'should not contains `.clear` method');
   const array = [];
   done = false;
+  // eslint-disable-next-line es/no-nonstandard-array-prototype-properties -- legacy FF case
   array['@@iterator'] = undefined;
   array[Symbol.iterator] = function () {
     done = true;

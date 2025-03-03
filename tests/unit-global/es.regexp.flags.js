@@ -1,5 +1,5 @@
-/* eslint-disable regexp/sort-flags, regexp/no-useless-flag -- required for testing */
-import { DESCRIPTORS } from '../helpers/constants';
+/* eslint-disable prefer-regex-literals, regexp/sort-flags, regexp/no-useless-flag -- required for testing */
+import { DESCRIPTORS } from '../helpers/constants.js';
 
 if (DESCRIPTORS) {
   QUnit.test('RegExp#flags', assert => {
@@ -16,7 +16,7 @@ if (DESCRIPTORS) {
     let INDICES_SUPPORT = true;
     try {
       RegExp('.', 'd');
-    } catch (error) {
+    } catch {
       INDICES_SUPPORT = false;
     }
 

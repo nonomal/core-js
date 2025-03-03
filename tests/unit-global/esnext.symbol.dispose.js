@@ -1,9 +1,10 @@
-import { DESCRIPTORS } from '../helpers/constants';
+import { DESCRIPTORS } from '../helpers/constants.js';
 
 QUnit.test('Symbol.dispose', assert => {
   assert.true('dispose' in Symbol, 'Symbol.dispose available');
-  assert.nonEnumerable(Symbol, 'dispose');
   assert.true(Object(Symbol.dispose) instanceof Symbol, 'Symbol.dispose is symbol');
+  // Node 20.4.0 add `Symbol.dispose`, but with incorrect descriptor
+  // https://github.com/nodejs/node/issues/48699
   if (DESCRIPTORS) {
     const descriptor = Object.getOwnPropertyDescriptor(Symbol, 'dispose');
     assert.false(descriptor.enumerable, 'non-enumerable');

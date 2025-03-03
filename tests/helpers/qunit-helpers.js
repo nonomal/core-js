@@ -1,9 +1,11 @@
-import { DESCRIPTORS } from './constants';
+import { DESCRIPTORS } from './constants.js';
 import assign from 'core-js-pure/es/object/assign';
 import defineProperties from 'core-js-pure/es/object/define-properties';
+import getOwnPropertyNames from 'core-js-pure/es/object/get-own-property-names';
+import reduce from 'core-js-pure/es/array/reduce';
 import isIterable from 'core-js-pure/es/is-iterable';
 import ASYNC_ITERATOR from 'core-js-pure/es/symbol/async-iterator';
-import { is, arrayFromArrayLike } from './helpers';
+import { is, arrayFromArrayLike } from './helpers.js';
 
 // for Babel template transform
 if (!Object.freeze) Object.freeze = Object;
@@ -12,7 +14,9 @@ if (!DESCRIPTORS) Object.defineProperties = defineProperties;
 const { getOwnPropertyDescriptor } = Object;
 const { toString, propertyIsEnumerable } = Object.prototype;
 
-assign(QUnit.assert, {
+const { assert } = QUnit;
+
+assign(assert, {
   arity(fn, length, message) {
     this.same(fn.length, length, message ?? `The arity of the function is ${ length }`);
   },
@@ -21,6 +25,18 @@ assign(QUnit.assert, {
   },
   avoid(message = 'It should never be called') {
     this.ok(false, message);
+  },
+  // TODO: Drop from future `core-js` versions
+  // available from `qunit@2.21`
+  closeTo(actual, expected, delta, message) {
+    if (typeof delta != 'number') throw new TypeError('closeTo() requires a delta argument');
+    const result = Math.abs(actual - expected) <= delta;
+    this.pushResult({
+      result,
+      actual,
+      expected,
+      message: message ?? `The value should be within ${ delta } inclusive`,
+    });
   },
   enumerable(O, key, message) {
     const result = !DESCRIPTORS || propertyIsEnumerable.call(O, key);
@@ -33,17 +49,8 @@ assign(QUnit.assert, {
         : 'Enumerability is not applicable',
     });
   },
-  epsilon(a, b, EPSILON = 1e-11, message) {
-    const result = Math.abs(a - b) <= EPSILON;
-    this.pushResult({
-      result,
-      actual: result,
-      expected: `The value should be closer to the target by less than ${ EPSILON }`,
-      message: message ?? `The value should be closer to the target by less than ${ EPSILON }`,
-    });
-  },
-  // TODO: Drop from `core-js@4`
-  // unavailable in `qunit@1` that's required for testing in IE8-
+  // TODO: Drop from future `core-js` versions
+  // unavailable in `qunit@1` that's required for testing in IE9-, Chrome 38, etc.
   false(value, message = 'The value is `false`') {
     this.same(value, false, message);
   },
@@ -107,8 +114,8 @@ assign(QUnit.assert, {
       actual: result,
       expected: 'The property should be non-configurable',
       message: DESCRIPTORS
-        ? 'Configurability is not applicable'
-        : message ?? `${ typeof key == 'symbol' ? 'property' : `'${ key }'` } is non-configurable`,
+        ? message ?? `${ typeof key == 'symbol' ? 'property' : `'${ key }'` } is non-configurable`
+        : 'Configurability is not applicable',
     });
   },
   nonEnumerable(O, key, message) {
@@ -168,9 +175,14 @@ assign(QUnit.assert, {
       message,
     });
   },
-  // TODO: Drop from `core-js@4`
-  // unavailable in `qunit@1` that's required for testing in IE8-
+  // TODO: Drop from future `core-js` versions
+  // unavailable in `qunit@1` that's required for testing in IE9-, Chrome 38, etc.
   true(value, message = 'The value is `true`') {
     this.same(value, true, message);
   },
 });
+
+assert.skip = reduce(getOwnPropertyNames(assert), (skip, method) => {
+  skip[method] = () => { /* empty */ };
+  return skip;
+}, {});

@@ -1,4 +1,5 @@
-import { createIterator } from '../helpers/helpers';
+import { STRICT } from '../helpers/constants.js';
+import { createIterator } from '../helpers/helpers.js';
 
 QUnit.test('Iterator#asIndexedPairs', assert => {
   const { asIndexedPairs } = Iterator.prototype;
@@ -11,8 +12,11 @@ QUnit.test('Iterator#asIndexedPairs', assert => {
 
   assert.arrayEqual(asIndexedPairs.call(createIterator(['a', 'b', 'c'])).toArray().toString(), '0,a,1,b,2,c', 'basic functionality');
 
-  assert.throws(() => asIndexedPairs.call(undefined, TypeError));
-  assert.throws(() => asIndexedPairs.call(null, TypeError));
-  assert.throws(() => asIndexedPairs.call({}, TypeError));
-  assert.throws(() => asIndexedPairs.call([], TypeError));
+  if (STRICT) {
+    assert.throws(() => asIndexedPairs.call(undefined), TypeError);
+    assert.throws(() => asIndexedPairs.call(null), TypeError);
+  }
+
+  assert.throws(() => asIndexedPairs.call({}).next(), TypeError);
+  assert.throws(() => asIndexedPairs.call([]).next(), TypeError);
 });

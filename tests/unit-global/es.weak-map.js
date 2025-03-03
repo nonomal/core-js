@@ -1,5 +1,5 @@
-import { DESCRIPTORS, FREEZING, GLOBAL, NATIVE } from '../helpers/constants';
-import { createIterable, nativeSubclass } from '../helpers/helpers';
+import { DESCRIPTORS, FREEZING, GLOBAL, NATIVE } from '../helpers/constants.js';
+import { createIterable, nativeSubclass } from '../helpers/helpers.js';
 
 const Symbol = GLOBAL.Symbol || {};
 const { freeze, isFrozen, keys, getOwnPropertyNames, getOwnPropertySymbols } = Object;
@@ -40,6 +40,7 @@ QUnit.test('WeakMap', assert => {
   assert.false(('clear' in WeakMap.prototype), 'should not contains `.clear` method');
   const array = [];
   done = false;
+  // eslint-disable-next-line es/no-nonstandard-array-prototype-properties -- legacy FF case
   array['@@iterator'] = undefined;
   array[Symbol.iterator] = function () {
     done = true;
